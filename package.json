@@ -22,7 +22,8 @@
     "zod": "^4.3.6",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "@supabase/supabase-js": "2.39.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

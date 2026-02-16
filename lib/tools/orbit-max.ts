@@ -9,6 +9,7 @@ import { navigationSystemTools } from './navigation-system';
 import { browserAutomationTools } from './browser-automation';
 import { vpsManagementTools } from './vps-management';
 import { creativeStudioTools } from './creative-studio';
+import { memoryTools } from '../memory';
 import { FunctionCall } from '../state';
 
 export const orbitMaxTools: FunctionCall[] = [
@@ -18,4 +19,5 @@ export const orbitMaxTools: FunctionCall[] = [
   ...browserAutomationTools,
   ...vpsManagementTools,
   ...creativeStudioTools,
+  ...memoryTools,
 ];

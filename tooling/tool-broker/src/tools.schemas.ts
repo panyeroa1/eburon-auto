@@ -24,6 +24,15 @@ export const ImageGenerateArgs = z.object({
   n: z.number().int().min(1).max(4).optional()
 });
 
+export const ImageEditArgs = z.object({
+  provider: z.enum(["huggingface", "fal", "replicate", "stability", "heartsync"]),
+  model: z.string().min(1),
+  prompt: z.string().min(1),
+  input_image_b64: z.string().min(1),
+  mask_image_b64: z.string().optional(),
+  output_format: z.enum(["png", "jpeg", "webp"]).optional()
+});
+
 export const VpsDeployComposeArgs = z.object({
   app_id: z.string().min(1),
   git_ref: z.string().min(1).max(80),

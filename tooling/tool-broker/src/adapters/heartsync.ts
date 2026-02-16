@@ -46,4 +46,24 @@ export async function imageGenerateHeartsync(args: any) {
              return {
                 data: {
                     kind: "image",
-                    images: [{ mime: "image/png", b
+                    images: [{ mime: "image/png", b64: base64 }]
+                },
+                logs: [`Generated image via Heartsync at ${HEARTSYNC_URL}`]
+            };
+        }
+        
+        // Handle case where it might be a url or other format (mocking behavior if specific API is unknown)
+        // If the space returns a file path/url, we might need to fetch it.
+        // For now, let's assume direct base64 return which is common for simple Gradio apps.
+    }
+
+    throw new Error("Invalid response format from Heartsync API");
+
+  } catch (err: any) {
+    // If the local service isn't running, return a descriptive error
+    if (err.code === 'ECONNREFUSED') {
+        throw new Error(`Heartsync service not found at ${HEARTSYNC_URL}. Please run: python app.py`);
+    }
+    throw err;
+  }
+}

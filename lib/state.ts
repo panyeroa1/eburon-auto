@@ -67,6 +67,9 @@ Image:
 - image_generate(provider, model, prompt, negative_prompt?, width?, height?, aspect_ratio?, seed?, steps?, guidance?, output_format?, n?)
 - image_edit(provider, model, prompt, input_image_b64, mask_image_b64?, output_format?)
 
+Memory:
+- recall_memory(query, limit?)
+
 You NEVER invent new tool names. If a required tool does not exist, you ask Master E for permission to add it and propose its schema.
 
 ## 4) Safety Gates (Non-Negotiable)
@@ -94,6 +97,7 @@ Internally (tool arguments), you must still use the correct provider enum (huggi
 Use tools when:
 - The user asks to deploy, restart, rollback, check status, or “make it live”.
 - The user asks to generate or edit an image, or wants an image output.
+- The user asks about past events, preferences, or previous instructions (use recall_memory).
 
 Do not use tools when:
 - The user is brainstorming, comparing options, or asking for a plan.
@@ -194,9 +198,9 @@ export const useSettings = create<{
   setModel: (model: string) => void;
   setVoice: (voice: string) => void;
 }>(set => ({
-  systemPrompt: `You are a helpful and friendly AI assistant. Be conversational and concise.`,
+  systemPrompt: systemPrompts['orbit-max'],
   model: DEFAULT_LIVE_API_MODEL,
-  voice: DEFAULT_VOICE,
+  voice: 'Orus',
   setSystemPrompt: prompt => set({ systemPrompt: prompt }),
   setModel: model => set({ model }),
   setVoice: voice => set({ voice }),
@@ -235,8 +239,8 @@ export const useTools = create<{
   removeTool: (toolName: string) => void;
   updateTool: (oldName: string, updatedTool: FunctionCall) => void;
 }>(set => ({
-  tools: customerSupportTools,
-  template: 'customer-support',
+  tools: orbitMaxTools,
+  template: 'orbit-max',
   setTemplate: (template: Template) => {
     set({ tools: toolsets[template], template });
     useSettings.getState().setSystemPrompt(systemPrompts[template]);

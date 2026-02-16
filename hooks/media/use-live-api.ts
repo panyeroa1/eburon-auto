@@ -25,6 +25,7 @@ import { AudioStreamer } from '../../lib/audio-streamer';
 import { audioContext } from '../../lib/utils';
 import VolMeterWorket from '../../lib/worklets/vol-meter';
 import { useLogStore, useSettings } from '@/lib/state';
+import { executeRecallMemory } from '@/lib/memory';
 
 export type UseLiveApiResults = {
   client: GenAILiveClient;
@@ -111,6 +112,17 @@ export function useLiveApi({
           text: triggerMessage,
           isFinal: true,
         });
+
+        // Check if this is a Memory tool
+        if (fc.name === 'recall_memory') {
+           const response = await executeRecallMemory(fc.args);
+           functionResponses.push({
+             id: fc.id,
+             name: fc.name,
+             response: response
+           });
+           continue;
+        }
 
         // Check if this is a VPS or Image tool that needs the broker
         const isBrokerTool = fc.name.startsWith('vps_') || fc.name.startsWith('image_');

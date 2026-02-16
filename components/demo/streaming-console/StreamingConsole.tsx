@@ -15,6 +15,7 @@ import {
   useTools,
   ConversationTurn,
 } from '@/lib/state';
+import { saveMessage, executeRecallMemory } from '@/lib/memory';
 
 const formatTimestamp = (date: Date) => {
   const pad = (num: number, size = 2) => num.toString().padStart(size, '0');
@@ -117,6 +118,15 @@ export default function StreamingConsole() {
       } else {
         addTurn({ role: 'user', text, isFinal });
       }
+
+      if (isFinal) {
+        // Save user message to memory
+        // We need to fetch the full text. If it was an update, 'text' is just the chunk? 
+        // No, 'text' in inputTranscription event is usually the chunk or full if isFinal.
+        // However, useLogStore has the accumulated text.
+        // A safer bet is to use the text passed here if isFinal is true for inputTranscription.
+        saveMessage('user', text);
+      }
     };
 
     const handleOutputTranscription = (text: string, isFinal: boolean) => {
@@ -169,7 +179,23 @@ export default function StreamingConsole() {
       if (last && !last.isFinal) {
         updateLastTurn({ isFinal: true });
       }
+      // Save agent response to memory on turn complete
+      if (last && last.role === 'agent') {
+        saveMessage('agent', last.text);
+      }
     };
+
+    // Intercept tool calls for client-side memory handling
+    const originalSendToolResponse = client.sendToolResponse.bind(client);
+    // Note: We can't easily override client methods here without modifying the client class.
+    // Instead, we can listen for tool calls in useLiveApi, OR we can just rely on the fact 
+    // that 'recall_memory' needs to be handled.
+    // However, the `useLiveApi` hook handles tool calls. We should update the `useLiveApi` hook 
+    // to handle `recall_memory` client-side, OR we can add a specialized handler here if the architecture supported it.
+    // Since `useLiveApi` is where tool dispatch happens, I will modify `useLiveApi` logic via `hooks/media/use-live-api.ts`.
+    // But `useLiveApi` is in a different file. I will inject logic there if needed, 
+    // but the instruction was to "Give the agent the memory", implying the tool needs to work.
+    // I will modify `hooks/media/use-live-api.ts` in the next change block to handle `recall_memory`.
 
     client.on('inputTranscription', handleInputTranscription);
     client.on('outputTranscription', handleOutputTranscription);

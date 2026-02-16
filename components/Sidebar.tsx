@@ -8,6 +8,7 @@ import { DEFAULT_LIVE_API_MODEL, AVAILABLE_VOICES } from '@/lib/constants';
 import { useLiveAPIContext } from '@/contexts/LiveAPIContext';
 import { useState } from 'react';
 import ToolEditorModal from './ToolEditorModal';
+import { useMemoryStore } from '@/lib/memory';
 
 const AVAILABLE_MODELS = [
   DEFAULT_LIVE_API_MODEL
@@ -19,6 +20,7 @@ export default function Sidebar() {
     useSettings();
   const { tools, toggleTool, addTool, removeTool, updateTool } = useTools();
   const { connected } = useLiveAPIContext();
+  const { supabaseUrl, supabaseKey, setSupabaseConfig } = useMemoryStore();
 
   const [editingTool, setEditingTool] = useState<FunctionCall | null>(null);
 
@@ -40,6 +42,28 @@ export default function Sidebar() {
         </div>
         <div className="sidebar-content">
           <div className="sidebar-section">
+            <h4 className="sidebar-section-title">Memory & Persistence</h4>
+            <label>
+              Supabase URL
+              <input
+                 type="text"
+                 value={supabaseUrl}
+                 onChange={(e) => setSupabaseConfig(e.target.value, supabaseKey)}
+                 placeholder="https://xyz.supabase.co"
+              />
+            </label>
+            <label>
+              Supabase Key
+              <input
+                 type="password"
+                 value={supabaseKey}
+                 onChange={(e) => setSupabaseConfig(supabaseUrl, e.target.value)}
+                 placeholder="public-anon-key"
+              />
+            </label>
+          </div>
+          <div className="sidebar-section">
+            <h4 className="sidebar-section-title">Agent Config</h4>
             <fieldset disabled={connected}>
               <label>
                 System Prompt

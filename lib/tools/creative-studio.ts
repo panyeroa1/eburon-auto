@@ -28,5 +28,26 @@ export const creativeStudioTools: FunctionCall[] = [
     },
     isEnabled: true,
     scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'image_edit',
+    description: 'Edit an existing image using a prompt and optional mask (inpainting/editing).',
+    parameters: {
+      type: 'OBJECT',
+      properties: {
+        provider: {
+          type: 'STRING',
+          enum: ['huggingface', 'fal', 'replicate', 'stability', 'heartsync']
+        },
+        model: { type: 'STRING' },
+        prompt: { type: 'STRING' },
+        input_image_b64: { type: 'STRING', description: 'Base64 encoded input image string' },
+        mask_image_b64: { type: 'STRING', description: 'Base64 encoded mask image string (optional)' },
+        output_format: { type: 'STRING', enum: ['png', 'jpeg', 'webp'] }
+      },
+      required: ['provider', 'model', 'prompt', 'input_image_b64']
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
   }
 ];
