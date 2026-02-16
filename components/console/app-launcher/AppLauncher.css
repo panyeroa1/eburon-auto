@@ -1,0 +1,96 @@
+.app-launcher {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.launcher-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.launcher-header h2 {
+  font-size: 24px;
+  color: var(--text);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.launcher-header p {
+  color: var(--gray-500);
+  font-size: 14px;
+}
+
+.apps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (min-width: 600px) {
+  .apps-grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 600px;
+  }
+}
+
+.app-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  color: var(--text);
+}
+
+.app-item:hover {
+  transform: scale(1.05);
+}
+
+.app-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  background-color: var(--Neutral-15);
+  border: 1px solid var(--Neutral-30);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Service Colors */
+.app-item.gmail .app-icon { color: #EA4335; }
+.app-item.calendar .app-icon { color: #4285F4; }
+.app-item.drive .app-icon { color: #1FA463; }
+.app-item.docs .app-icon { color: #4285F4; }
+.app-item.maps .app-icon { color: #34A853; }
+.app-item.search .app-icon { color: #FBBC04; }
+.app-item.youtube .app-icon { color: #FF0000; }
+.app-item.translate .app-icon { color: #4285F4; }
+.app-item.photos .app-icon { color: #FBBC04; }
+.app-item.meet .app-icon { color: #00897B; }
+.app-item.orbit .app-icon { color: var(--accent-blue); border-color: var(--accent-blue); }
+
+.app-label {
+  font-size: 12px;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: var(--gray-300);
+}
+
+.app-item:hover .app-label {
+  color: white;
+}

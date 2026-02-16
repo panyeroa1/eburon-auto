@@ -15,7 +15,7 @@ export default function ChatInput() {
     if (!text.trim() || !connected) return;
 
     client.send([{ text: text.trim() }]);
-    
+
     // Manually add the user's message to the log store so it appears in the console immediately
     useLogStore.getState().addTurn({
       role: 'user',
@@ -36,7 +36,9 @@ export default function ChatInput() {
   return (
     <div className="chat-input-container">
       <div className={`chat-input-box ${!connected ? 'disabled' : ''}`}>
-        <span className="chat-input-prompt">gemini&gt;</span>
+        {/* Rebranded prompt from gemini> to orbit> */}
+        <span className="chat-input-prompt">orbit&gt;</span>
+
         <textarea
           ref={inputRef}
           className="chat-input-field"
@@ -47,6 +49,7 @@ export default function ChatInput() {
           disabled={!connected}
           rows={1}
         />
+
         <button
           className={`send-button ${!text.trim() || !connected ? 'disabled' : ''}`}
           onClick={handleSubmit}

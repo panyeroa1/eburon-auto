@@ -4,21 +4,21 @@
 */
 
 import { FunctionCall } from '../state';
-import { FunctionResponseScheduling } from '@google/genai';
+import { FunctionResponseScheduling, Type } from '@google/genai';
 
 export const navigationSystemTools: FunctionCall[] = [
   {
     name: 'find_route',
     description: 'Finds a route to a specified destination.',
     parameters: {
-      type: 'OBJECT',
+      type: Type.OBJECT,
       properties: {
         destination: {
-          type: 'STRING',
+          type: Type.STRING,
           description: 'The destination address or landmark.',
         },
         modeOfTransport: {
-          type: 'STRING',
+          type: Type.STRING,
           description: 'The mode of transport (e.g., driving, walking, cycling).',
         },
       },
@@ -31,14 +31,14 @@ export const navigationSystemTools: FunctionCall[] = [
     name: 'find_nearby_places',
     description: 'Finds nearby places of a certain type.',
     parameters: {
-      type: 'OBJECT',
+      type: Type.OBJECT,
       properties: {
         placeType: {
-          type: 'STRING',
+          type: Type.STRING,
           description: 'The type of place to search for (e.g., restaurant, gas station, park).',
         },
         radius: {
-          type: 'NUMBER',
+          type: Type.NUMBER,
           description: 'The search radius in kilometers.',
         },
       },
@@ -51,10 +51,10 @@ export const navigationSystemTools: FunctionCall[] = [
     name: 'get_traffic_info',
     description: 'Gets real-time traffic information for a specified location.',
     parameters: {
-      type: 'OBJECT',
+      type: Type.OBJECT,
       properties: {
         location: {
-          type: 'STRING',
+          type: Type.STRING,
           description: 'The location to get traffic information for.',
         },
       },

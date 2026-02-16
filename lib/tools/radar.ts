@@ -4,17 +4,17 @@
  */
 
 import { FunctionCall } from '../state';
-import { FunctionResponseScheduling } from '@google/genai';
+import { FunctionResponseScheduling, Type } from '@google/genai';
 
 export const radarTools: FunctionCall[] = [
   {
     name: 'scan_nearby',
     description: 'Scans the user\'s surroundings for places matching a query and displays them on the radar.',
     parameters: {
-      type: 'OBJECT',
+      type: Type.OBJECT,
       properties: {
         query: {
-          type: 'STRING',
+          type: Type.STRING,
           description: 'The type of place to search for (e.g., "coffee", "parking").',
         },
       },

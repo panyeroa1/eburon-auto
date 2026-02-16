@@ -119,6 +119,69 @@ export function useLiveApi({
           isFinal: true,
         });
 
+        // --- Google Service Mocks ---
+        if (fc.name === 'google_calendar_read') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: JSON.stringify([
+                    { id: '1', summary: 'Team Sync', startTime: new Date(Date.now() + 3600000).toISOString() },
+                    { id: '2', summary: 'Lunch with Client', startTime: new Date(Date.now() + 86400000).toISOString() }
+                ])}
+            });
+            continue;
+        }
+        if (fc.name === 'google_calendar_create') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Event created: ${fc.args.summary} at ${fc.args.startTime}` }
+            });
+            continue;
+        }
+        if (fc.name === 'gmail_read') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: JSON.stringify([
+                    { id: '101', from: 'boss@company.com', subject: 'Project Update', snippet: 'Please review the attached...' },
+                    { id: '102', from: 'newsletter@tech.com', subject: 'Weekly Digest', snippet: 'Top stories this week...' }
+                ])}
+            });
+            continue;
+        }
+        if (fc.name === 'gmail_send') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Email sent to ${fc.args.to}` }
+            });
+            continue;
+        }
+        if (fc.name === 'google_drive_search') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: JSON.stringify([
+                    { name: 'Project Specs v2', type: 'document', link: 'http://docs.google.com/...' },
+                    { name: 'Q3 Budget', type: 'spreadsheet', link: 'http://sheets.google.com/...' }
+                ])}
+            });
+            continue;
+        }
+        if (fc.name === 'youtube_search') {
+             functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Found video: "Tech News Today" (http://youtube.com/watch?v=xyz)` }
+            });
+            continue;
+        }
+         if (fc.name === 'google_translate') {
+             functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Translated to ${fc.args.targetLanguage}: [Simulated Translation]` }
+            });
+            continue;
+        }
+
+
+        // --- Existing Tool Logic ---
+
         // Check if this is a Memory tool
         if (fc.name === 'recall_memory') {
            const response = await executeRecallMemory(fc.args);
@@ -200,7 +263,7 @@ export function useLiveApi({
         }
 
         // Check if this is a VPS or Image tool that needs the broker
-        const isBrokerTool = fc.name.startsWith('vps_') || fc.name.startsWith('image_');
+        const isBrokerTool = fc.name.startsWith('vps_') || fc.name.startsWith('image_') || fc.name.startsWith('browser_');
 
         if (isBrokerTool) {
           try {

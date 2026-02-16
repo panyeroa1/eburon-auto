@@ -4,7 +4,7 @@
 */
 import { useEffect, useRef, useState } from 'react';
 import PopUp from '../popup/PopUp';
-import WelcomeScreen from '../welcome-screen/WelcomeScreen';
+import AppLauncher from '../../console/app-launcher/AppLauncher';
 // FIX: Import LiveServerContent to correctly type the content handler.
 import { LiveConnectConfig, Modality, LiveServerContent } from '@google/genai';
 
@@ -243,7 +243,7 @@ export default function StreamingConsole() {
       {showPopUp && <PopUp onClose={handleClosePopUp} />}
       <Radar />
       {turns.length === 0 ? (
-        <WelcomeScreen />
+        <AppLauncher />
       ) : (
         <div className="transcription-view" ref={scrollRef}>
           {turns.map((t, i) => (
@@ -257,7 +257,7 @@ export default function StreamingConsole() {
                   {t.role === 'user'
                     ? 'You'
                     : t.role === 'agent'
-                      ? 'Agent'
+                      ? 'Orbit'
                       : 'System'}
                 </div>
                 <div className="transcription-timestamp">

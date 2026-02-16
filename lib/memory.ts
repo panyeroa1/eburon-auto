@@ -4,7 +4,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { FunctionCall } from './state';
-import { FunctionResponseScheduling } from '@google/genai';
+import { FunctionResponseScheduling, Type } from '@google/genai';
 import { create } from 'zustand';
 
 // --- Local Storage & Configuration ---
@@ -89,14 +89,14 @@ export const memoryTools: FunctionCall[] = [
     name: 'recall_memory',
     description: 'Searches long-term memory (past conversations) for details. Use this to recall facts, user preferences, or previous instructions.',
     parameters: {
-      type: 'OBJECT',
+      type: Type.OBJECT,
       properties: {
         query: {
-          type: 'STRING',
+          type: Type.STRING,
           description: 'The search query to find relevant past messages.',
         },
         limit: {
-          type: 'INTEGER',
+          type: Type.INTEGER,
           description: 'Number of results to return (default 5).',
         }
       },
