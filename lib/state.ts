@@ -87,7 +87,7 @@ VPS & System:
 - vps_restart_service(app_id, service?)
 - vps_get_status(app_id)
 - vps_rollback_release(app_id, git_ref)
-- vps_run_command(command)  <-- USE WITH CAUTION (SSH Root)
+- vps_run_command(command)  <-- Executed as root@168.231.78.113
 
 Local Intelligence:
 - call_local_model(model?, prompt, system?) <-- Use for coding/private tasks on 168.231.78.113

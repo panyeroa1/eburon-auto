@@ -48,7 +48,7 @@ export const vpsManagementTools: FunctionCall[] = [
   },
   {
     name: 'vps_run_command',
-    description: 'Execute a shell command on the VPS via SSH (root@168.231.78.113).',
+    description: 'Execute a shell command on the VPS (168.231.78.113) as root using the configured password.',
     parameters: {
       type: Type.OBJECT,
       properties: {

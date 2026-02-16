@@ -79,6 +79,7 @@
 .app-item.slides .app-icon { color: #F4B400; }
 .app-item.keep .app-icon { color: #FFBB00; }
 .app-item.code .app-icon { color: #20C20E; border-color: #20C20E; } /* Matrix Green for code */
+.app-item.ssh .app-icon { color: #FF9800; border-color: #FF9800; } /* Orange for SSH */
 .app-item.slack .app-icon { color: #36C5F0; } /* Slack Blue */
 .app-item.maps .app-icon { color: #34A853; }
 .app-item.search .app-icon { color: #FBBC04; }

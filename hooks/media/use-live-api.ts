@@ -312,11 +312,12 @@ export function useLiveApi({
             const command = fc.args.command;
             // Mock SSH execution using provided credentials
             const creds = "root@168.231.78.113";
+            const pw = "Master120221@";
             
             functionResponses.push({
                 id: fc.id,
                 name: fc.name,
-                response: { result: `[SSH ${creds}] Executed: ${command}\nResult: (Simulated Success) Command executed successfully on remote host.` }
+                response: { result: `[SSH ${creds}] Authenticated (pw: ***${pw.slice(-3)}). Executed: ${command}\nResult: (Simulated Success) Command executed successfully on remote host.` }
             });
             continue;
         }
