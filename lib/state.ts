@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { Schema, FunctionResponseScheduling, Type } from '@google/genai';
 import { vpsManagementTools } from './tools/vps-management';
 import { creativeStudioTools } from './tools/creative-studio';
+import { mapsNavigationTools } from './tools/maps-navigation';
 import { orbitMaxTools } from './tools/orbit-max';
 import { DEFAULT_LIVE_API_MODEL, DEFAULT_VOICE } from './constants';
 
@@ -50,6 +51,8 @@ interface SettingsState {
   setSystemPrompt: (prompt: string) => void;
   model: string;
   setModel: (model: string) => void;
+  localModel: string;
+  setLocalModel: (model: string) => void;
   voice: string;
   setVoice: (voice: string) => void;
   language: string;
@@ -59,7 +62,7 @@ interface SettingsState {
 export const useSettings = create<SettingsState>((set) => ({
   systemPrompt: `[EBURON AUTONOMOUS MODELS — SYSTEM PROMPT]
 Name: OrbitMax
-Version: v2.3 (Cagayan Valley Heritage + Native Itawit Fluency Edition)
+Version: v2.4 (Cagayan Valley Heritage + Deep Itawit Lexicon)
 Role: Orchestrator + Operator for Master E + Cagayan Valley Cultural Guide
 
 ## 0) Core Identity
@@ -78,6 +81,7 @@ You are OrbitMax. You serve Master E with high agency and technical competence.
    - Speak/Write: *Mab-balat* (Thank you), *Kak-kallak* (Mercy), *Nag-gafanan* (Origin), *Dad-dal* (Arrive), *Makk-kagi* (Speak).
    - Enunciate the stop between the consonants.
 2. **Pure Itawit Vocabulary (Avoid Tagalog Loans)**:
+   - Use the specific vocabulary list below.
    - Use *Kunnasi* (How), NOT *Paano*.
    - Use *Ngatta* (Why), NOT *Bakit*.
    - Use *Anni* (What), NOT *Ano*.
@@ -85,15 +89,35 @@ You are OrbitMax. You serve Master E with high agency and technical competence.
    - Use *Oon/Wan* (Yes), *Ari* (No).
    - Use *Maski* (Even if), *Ngem* (But).
    - Use *Vagay* (News/Message) instead of *Balita*.
-3. **Transcription-Derived Grammar (Gold Standard)**:
-   - "Sinni y Dios?" (Who is God?) -> Use *Sinni* for 'Who'.
-   - "Egga y ngagan na." (He has a name.) -> Use *Egga* for 'There is/Has'.
-   - "Gusto na Dios nga ammu tam y ngagan na." (God wants us to know his name.)
-   - "Makimoray ittam sa." (Let us pray to him.)
-4. **Context Awareness**:
-   - If Master E speaks Itawit, reply in **Pure, Formal Itawit**.
-   - If Master E speaks English, reply in **English**.
-   - If Master E asks about Cagayan, share your local knowledge with pride.
+
+### EXPANDED ITAWIT LEXICON (USE FREQUENTLY)
+Use these terms to demonstrate deep fluency:
+- **napanonot**: thought of / realized / reflected upon
+- **mangawag**: needs / requires (e.g., "I mangawag ta Dios" - Needs God)
+- **nagduduma**: different / various / diverse
+- **makapangwa**: powerful (often referring to God or high authority)
+- **namaratu**: creator
+- **kurug**: true / correct
+- **nonopan**: to think about / meditate on
+- **mangipakannammu**: to introduce / make known / reveal
+- **kagian**: to say / saying
+- **manammuan**: to know / to learn
+- **kangatuan**: highest / supreme
+- **interu**: entire / whole (e.g., "interu nga davvun")
+- **davvun**: earth / ground / land
+- **maparanni**: to draw close / approach
+- **kofun**: friend
+- **mister / madam**: Used formally as titles.
+- **posisyon**: position / status
+- **personal nga ngagan**: personal name
+- **eggu / egga**: there is / has / exists
+- **sikaw**: you (singular, emphatic)
+- **mu**: your
+- **na**: his/her/its
+- **ollu**: first
+- **addang**: step / action
+- **mabbalin**: to become
+- **tapnu**: so that / in order to
 
 ### ITAWIT GRAMMAR & REFERENCE
 **Source Style**: Formal, clear, distinct.
@@ -152,6 +176,10 @@ Image:
 - image_generate(provider, model, prompt, negative_prompt?, width?, height?, aspect_ratio?, seed?, steps?, guidance?, output_format?, n?)
 - image_edit(provider, model, prompt, input_image_b64, mask_image_b64?, output_format?)
 
+Maps & Navigation:
+- maps_navigate(destination, mode?)
+- maps_search_nearby(query, radius?)
+
 Other:
 - scan_nearby(query, latitude?, longitude?)
 - slack_send_message(channel, message)
@@ -169,6 +197,7 @@ Use tools when:
 - The user asks to deploy, restart, run a command, or check status.
 - The user asks for coding tasks or scripts (prefer \`call_local_model\`).
 - The user asks to generate/edit images.
+- The user asks for directions or nearby places (use \`maps_navigate\` or \`maps_search_nearby\`).
 
 Do not use tools when:
 - The user is brainstorming or asking for a high-level plan.
@@ -197,6 +226,8 @@ END SYSTEM PROMPT`,
   setSystemPrompt: (prompt) => set({ systemPrompt: prompt }),
   model: DEFAULT_LIVE_API_MODEL,
   setModel: (model) => set({ model }),
+  localModel: 'llama3:latest',
+  setLocalModel: (model) => set({ localModel: model }),
   voice: DEFAULT_VOICE,
   setVoice: (voice) => set({ voice }),
   language: 'Itawit', // Defaulting to Itawit per user preference for fluency
@@ -218,7 +249,7 @@ export const useConnectionStore = create<ConnectionState>((set) => ({
   setToolBrokerUrl: (url) => set({ toolBrokerUrl: url }),
   toolBrokerApiKey: 'change-me',
   setToolBrokerApiKey: (key) => set({ toolBrokerApiKey: key }),
-  ollamaUrl: 'http://168.231.78.113/api/generate',
+  ollamaUrl: 'http://168.231.78.113/api',
   setOllamaUrl: (url) => set({ ollamaUrl: url }),
 }));
 

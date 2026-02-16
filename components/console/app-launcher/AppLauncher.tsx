@@ -17,7 +17,8 @@ interface AppConfig {
 
 const APPS: AppConfig[] = [
   { id: 'search', label: 'Search', icon: 'search', prompt: 'I need to search the web for something.', colorClass: 'search' },
-  { id: 'maps', label: 'Maps', icon: 'map', prompt: 'Open Google Maps and find where I am.', colorClass: 'maps' },
+  { id: 'navigate', label: 'Navigate', icon: 'navigation', prompt: 'Navigate me to the nearest coffee shop.', colorClass: 'maps' },
+  { id: 'nearby', label: 'Near Me', icon: 'near_me', prompt: 'What is interesting near my current location?', colorClass: 'maps' },
   { id: 'gmail', label: 'Gmail', icon: 'mail', prompt: 'Check my Gmail for unread messages.', colorClass: 'gmail' },
   { id: 'calendar', label: 'Calendar', icon: 'calendar_today', prompt: 'What is on my Calendar today?', colorClass: 'calendar' },
   { id: 'drive', label: 'Drive', icon: 'add_to_drive', prompt: 'Search my Google Drive for recent files.', colorClass: 'drive' },

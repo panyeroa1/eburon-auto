@@ -6,17 +6,13 @@ import { FunctionCall, useSettings, useUI, useTools, useConnectionStore } from '
 import c from 'classnames';
 import { DEFAULT_LIVE_API_MODEL, AVAILABLE_VOICES, AVAILABLE_LANGUAGES } from '@/lib/constants';
 import { useLiveAPIContext } from '@/contexts/LiveAPIContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ToolEditorModal from './ToolEditorModal';
 import { useMemoryStore } from '@/lib/memory';
 
-const AVAILABLE_MODELS = [
-  DEFAULT_LIVE_API_MODEL
-];
-
 export default function Sidebar() {
   const { isSidebarOpen, toggleSidebar } = useUI();
-  const { systemPrompt, model, voice, language, setSystemPrompt, setModel, setVoice, setLanguage } =
+  const { systemPrompt, voice, language, localModel, setSystemPrompt, setVoice, setLanguage, setLocalModel } =
     useSettings();
   const { tools, toggleTool, addTool, removeTool, updateTool } = useTools();
   const { connected } = useLiveAPIContext();
@@ -24,6 +20,38 @@ export default function Sidebar() {
   const { toolBrokerUrl, toolBrokerApiKey, ollamaUrl, setToolBrokerUrl, setToolBrokerApiKey, setOllamaUrl } = useConnectionStore();
 
   const [editingTool, setEditingTool] = useState<FunctionCall | null>(null);
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+
+  // Fetch Ollama models when URL changes or component mounts
+  useEffect(() => {
+    async function fetchModels() {
+      try {
+        // Assume ollamaUrl is base (e.g. http://168.231.78.113/api)
+        // Adjust path if user provided full generate path
+        const baseUrl = ollamaUrl.replace('/generate', '');
+        const res = await fetch(`${baseUrl}/tags`);
+        if (res.ok) {
+          const data = await res.json();
+          // Ollama /api/tags returns { models: [ { name: "model:tag" }, ... ] }
+          if (data.models && Array.isArray(data.models)) {
+            const names = data.models.map((m: any) => m.name);
+            setOllamaModels(names);
+            // Ensure selected model is in list, if not set first
+            if (names.length > 0 && !names.includes(localModel)) {
+               setLocalModel(names[0]);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to fetch Ollama models:", e);
+        // Fallback or keep existing
+      }
+    }
+    
+    if (ollamaUrl) {
+      fetchModels();
+    }
+  }, [ollamaUrl, localModel, setLocalModel]);
 
   const handleSaveTool = (updatedTool: FunctionCall) => {
     if (editingTool) {
@@ -63,12 +91,12 @@ export default function Sidebar() {
               />
             </label>
             <label>
-              Ollama URL
+              Ollama Base URL
               <input
                  type="text"
                  value={ollamaUrl}
                  onChange={(e) => setOllamaUrl(e.target.value)}
-                 placeholder="http://168.231.78.113/api/generate"
+                 placeholder="http://168.231.78.113/api"
               />
             </label>
           </div>
@@ -116,15 +144,19 @@ export default function Sidebar() {
                 />
               </label>
               <label>
-                Model
-                <select value={model} onChange={e => setModel(e.target.value)}>
-                  {/* This is an experimental model name that should not be removed from the options. */}
-                  {AVAILABLE_MODELS.map(m => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
+                Local Model (Ollama)
+                <select value={localModel} onChange={e => setLocalModel(e.target.value)}>
+                  {ollamaModels.length > 0 ? (
+                    ollamaModels.map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))
+                  ) : (
+                    <option value="llama3:latest">llama3:latest (Default)</option>
+                  )}
                 </select>
+                <div style={{fontSize: '0.8em', color: 'gray', marginTop: '4px'}}>
+                   Used for 'call_local_model' tasks on VPS.
+                </div>
               </label>
               <label>
                 Voice

@@ -779,6 +779,58 @@ header .export-button {
   white-space: pre;
 }
 
+/* Image Component Box Styles */
+.transcription-image-box {
+  margin-top: 16px;
+  position: relative;
+  cursor: pointer;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--Neutral-30);
+  max-width: 350px;
+  width: 100%;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: var(--Neutral-5);
+}
+
+.transcription-image-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border-color: var(--accent-blue);
+}
+
+.transcription-image-box img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.image-hover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.transcription-image-box:hover .image-hover-overlay {
+  opacity: 1;
+}
+
+.image-hover-overlay .material-symbols-outlined {
+  color: white;
+  font-size: 48px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
 
 .counter-container {
   position: absolute;

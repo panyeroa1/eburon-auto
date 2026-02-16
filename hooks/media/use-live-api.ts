@@ -49,7 +49,7 @@ export function useLiveApi({
 }: {
   apiKey: string;
 }): UseLiveApiResults {
-  const { model } = useSettings();
+  const { model, localModel } = useSettings();
   const { toolBrokerUrl, toolBrokerApiKey, ollamaUrl } = useConnectionStore();
   const client = useMemo(() => new GenAILiveClient(apiKey, model), [apiKey, model]);
 
@@ -120,6 +120,8 @@ export function useLiveApi({
           isFinal: true,
         });
 
+        const args = fc.args as any;
+
         // --- Google Service Mocks ---
         if (fc.name === 'google_calendar_read') {
             functionResponses.push({
@@ -134,7 +136,7 @@ export function useLiveApi({
         if (fc.name === 'google_calendar_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Event created: ${(fc.args as any).summary} at ${(fc.args as any).startTime}` }
+                response: { result: `Event created: ${args.summary} at ${args.startTime}` }
             });
             continue;
         }
@@ -151,7 +153,7 @@ export function useLiveApi({
         if (fc.name === 'gmail_send') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Email sent to ${(fc.args as any).to}` }
+                response: { result: `Email sent to ${args.to}` }
             });
             continue;
         }
@@ -168,28 +170,28 @@ export function useLiveApi({
         if (fc.name === 'google_docs_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Created Google Doc: "${(fc.args as any).title}" (https://docs.google.com/document/d/mock-id)` }
+                response: { result: `Created Google Doc: "${args.title}" (https://docs.google.com/document/d/mock-id)` }
             });
             continue;
         }
         if (fc.name === 'google_sheets_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Created Google Sheet: "${(fc.args as any).title}" (https://docs.google.com/spreadsheets/d/mock-id)` }
+                response: { result: `Created Google Sheet: "${args.title}" (https://docs.google.com/spreadsheets/d/mock-id)` }
             });
             continue;
         }
         if (fc.name === 'google_slides_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Created Google Slides: "${(fc.args as any).title}" (https://docs.google.com/presentation/d/mock-id)` }
+                response: { result: `Created Google Slides: "${args.title}" (https://docs.google.com/presentation/d/mock-id)` }
             });
             continue;
         }
         if (fc.name === 'google_keep_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Created Keep Note: "${(fc.args as any).title || 'Untitled'}"` }
+                response: { result: `Created Keep Note: "${args.title || 'Untitled'}"` }
             });
             continue;
         }
@@ -203,7 +205,7 @@ export function useLiveApi({
          if (fc.name === 'google_translate') {
              functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `[Simulated Translation to ${(fc.args as any).targetLanguage}]: ${(fc.args as any).text} -> (Translated Content)` }
+                response: { result: `[Simulated Translation to ${args.targetLanguage}]: ${args.text} -> (Translated Content)` }
             });
             continue;
         }
@@ -212,7 +214,7 @@ export function useLiveApi({
         if (fc.name === 'slack_send_message') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Message sent to #${(fc.args as any).channel}: "${(fc.args as any).message}"` }
+                response: { result: `Message sent to #${args.channel}: "${args.message}"` }
             });
             continue;
         }
@@ -241,11 +243,9 @@ export function useLiveApi({
            continue;
         }
 
-        // Check if this is the Radar tool
-        if (fc.name === 'scan_nearby') {
-            const query = (fc.args as any).query as string;
-            const lat = (fc.args as any).latitude as number | undefined;
-            const lng = (fc.args as any).longitude as number | undefined;
+        // Check if this is the Radar tool or Maps Search tool
+        if (fc.name === 'scan_nearby' || fc.name === 'maps_search_nearby') {
+            const query = args.query as string;
             
             // Simulate finding nearby points since we don't have a real Place Search backend in this demo
             const count = Math.floor(Math.random() * 3) + 3; // 3 to 5 points
@@ -261,29 +261,42 @@ export function useLiveApi({
             useUI.getState().setRadarPoints(points);
             useUI.getState().setRadarActive(true);
 
-            let locMsg = "";
-            if (typeof lat === 'number' && typeof lng === 'number') {
-                locMsg = ` near ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-            }
-
             functionResponses.push({
              id: fc.id,
              name: fc.name,
-             response: { result: `Found ${count} locations for ${query}${locMsg}. Displaying on radar.` }
+             response: { result: `Found ${count} locations for ${query} nearby. Displaying on radar.` }
            });
            continue;
+        }
+
+        // Maps Navigate (Simulated)
+        if (fc.name === 'maps_navigate') {
+            const dest = args.destination;
+            const mode = args.mode || 'driving';
+            functionResponses.push({
+                id: fc.id,
+                name: fc.name,
+                response: { result: `Starting navigation to ${dest} (${mode}). Estimated time: 15 mins.` }
+            });
+            continue;
         }
 
         // Check if this is a Local Model (Ollama) tool
         if (fc.name === 'call_local_model') {
            try {
              // Use the specific IP provided by the user (now from store)
-             const modelName = (fc.args as any).model || 'llama3';
-             const prompt = (fc.args as any).prompt;
-             const system = (fc.args as any).system;
+             // Default to the one selected in settings if not provided in args
+             const modelName = args.model || localModel || 'llama3:latest';
+             const prompt = args.prompt;
+             const system = args.system;
+
+             // Ensure base URL doesn't end with slash if append path
+             const baseUrl = ollamaUrl.endsWith('/') ? ollamaUrl.slice(0, -1) : ollamaUrl;
+             // Construct the generate endpoint
+             const endpoint = baseUrl.endsWith('/generate') ? baseUrl : `${baseUrl}/generate`;
 
              // Note: User must run Ollama with OLLAMA_ORIGINS="*" to allow browser access
-             const response = await fetch(ollamaUrl, {
+             const response = await fetch(endpoint, {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json' },
                  body: JSON.stringify({
@@ -314,7 +327,7 @@ export function useLiveApi({
                  id: fc.id,
                  name: fc.name,
                  response: { 
-                     result: `[SIMULATION: Ollama Offline]\nGenerated code for "${(fc.args as any).prompt}":\n\`\`\`python\nprint("Hello from OrbitMax simulation!")\n# Actual model at ${ollamaUrl} is unreachable.\n\`\`\`` 
+                     result: `[SIMULATION: Ollama Offline]\nGenerated code for "${args.prompt}":\n\`\`\`python\nprint("Hello from OrbitMax simulation!")\n# Actual model at ${ollamaUrl} is unreachable.\n\`\`\`` 
                  }
              });
            }
@@ -323,7 +336,7 @@ export function useLiveApi({
         
         // Check if this is a VPS Command (SSH) tool
         if (fc.name === 'vps_run_command') {
-            const command = (fc.args as any).command;
+            const command = args.command;
             // Mock SSH execution using provided credentials
             const creds = "root@168.231.78.113";
             const pw = "Master120221@";
@@ -373,7 +386,7 @@ export function useLiveApi({
                if (images && Array.isArray(images)) {
                    useLogStore.getState().addTurn({
                        role: 'system',
-                       text: `Generated Image for: ${(fc.args as any).prompt}`,
+                       text: `Generated Image for: ${args.prompt}`,
                        isFinal: true,
                        images: images.map((img: any) => ({
                            type: img.mime,
@@ -394,7 +407,6 @@ export function useLiveApi({
 
              // SIMULATION FALLBACK for Broker Tools
              let mockResult: any = { result: "Action executed successfully (Simulated Backend)" };
-             const args = fc.args as any;
 
              if (fc.name === 'vps_deploy_compose') {
                  mockResult = { 
@@ -505,7 +517,7 @@ export function useLiveApi({
       client.off('audio', onAudio);
       client.off('toolcall', onToolCall);
     };
-  }, [client, toolBrokerUrl, toolBrokerApiKey, ollamaUrl]);
+  }, [client, toolBrokerUrl, toolBrokerApiKey, ollamaUrl, localModel]);
 
   const connect = useCallback(async () => {
     if (!config) {

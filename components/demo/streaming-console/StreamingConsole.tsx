@@ -18,6 +18,7 @@ import {
 } from '@/lib/state';
 import { saveMessage, executeRecallMemory } from '@/lib/memory';
 import Radar from '../../console/radar/Radar';
+import ImageModal from './ImageModal';
 
 const formatTimestamp = (date: Date) => {
   const pad = (num: number, size = 2) => num.toString().padStart(size, '0');
@@ -62,6 +63,7 @@ export default function StreamingConsole() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showPopUp, setShowPopUp] = useState(true);
   const [location, setLocation] = useState<{lat: number, lng: number} | undefined>(undefined);
+  const [selectedImage, setSelectedImage] = useState<{src: string, alt: string} | null>(null);
   const { setRadarActive } = useUI();
 
   const handleClosePopUp = () => {
@@ -254,6 +256,15 @@ export default function StreamingConsole() {
     <div className="transcription-container">
       {showPopUp && <PopUp onClose={handleClosePopUp} />}
       <Radar />
+      
+      {selectedImage && (
+        <ImageModal 
+          src={selectedImage.src} 
+          alt={selectedImage.alt} 
+          onClose={() => setSelectedImage(null)} 
+        />
+      )}
+
       {turns.length === 0 ? (
         <AppLauncher />
       ) : (
@@ -280,12 +291,21 @@ export default function StreamingConsole() {
                 {renderContent(t.text)}
               </div>
               {t.images && t.images.map((img, idx) => (
-                <div key={idx} className="transcription-image" style={{marginTop: '10px'}}>
+                <div 
+                  key={idx} 
+                  className="transcription-image-box"
+                  onClick={() => setSelectedImage({
+                    src: `data:${img.type};base64,${img.data}`,
+                    alt: `Generated content ${idx}`
+                  })}
+                >
                    <img 
                       src={`data:${img.type};base64,${img.data}`} 
                       alt="Generated Content" 
-                      style={{maxWidth: '100%', borderRadius: '12px', border: '1px solid #333'}} 
                    />
+                   <div className="image-hover-overlay">
+                      <span className="material-symbols-outlined">visibility</span>
+                   </div>
                 </div>
               ))}
               {t.groundingChunks && t.groundingChunks.length > 0 && (
