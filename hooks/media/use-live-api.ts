@@ -207,6 +207,15 @@ export function useLiveApi({
             continue;
         }
 
+        // --- Slack Mock ---
+        if (fc.name === 'slack_send_message') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Message sent to #${fc.args.channel}: "${fc.args.message}"` }
+            });
+            continue;
+        }
+
 
         // --- Existing Tool Logic ---
 
@@ -296,6 +305,20 @@ export function useLiveApi({
              });
            }
            continue;
+        }
+        
+        // Check if this is a VPS Command (SSH) tool
+        if (fc.name === 'vps_run_command') {
+            const command = fc.args.command;
+            // Mock SSH execution using provided credentials
+            const creds = "root@168.231.78.113";
+            
+            functionResponses.push({
+                id: fc.id,
+                name: fc.name,
+                response: { result: `[SSH ${creds}] Executed: ${command}\nResult: (Simulated Success) Command executed successfully on remote host.` }
+            });
+            continue;
         }
 
         // Check if this is a VPS or Image tool that needs the broker

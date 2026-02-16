@@ -45,5 +45,18 @@ export const vpsManagementTools: FunctionCall[] = [
     },
     isEnabled: true,
     scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'vps_run_command',
+    description: 'Execute a shell command on the VPS via SSH (root@168.231.78.113).',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        command: { type: Type.STRING, description: 'The shell command to execute.' },
+      },
+      required: ['command']
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
   }
 ];

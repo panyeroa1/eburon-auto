@@ -25,6 +25,7 @@ const APPS: AppConfig[] = [
   { id: 'sheets', label: 'Sheets', icon: 'table_chart', prompt: 'Create a new spreadsheet for tracking expenses.', colorClass: 'sheets' },
   { id: 'slides', label: 'Slides', icon: 'slideshow', prompt: 'Create a presentation about our quarterly goals.', colorClass: 'slides' },
   { id: 'keep', label: 'Keep', icon: 'lightbulb', prompt: 'Take a note: Buy milk and eggs.', colorClass: 'keep' },
+  { id: 'slack', label: 'Slack', icon: 'forum', prompt: 'Send a message to the #general channel on Slack.', colorClass: 'slack' },
   { id: 'code', label: 'Code', icon: 'terminal', prompt: 'Use the local model to write a Python script.', colorClass: 'code' },
   { id: 'youtube', label: 'YouTube', icon: 'smart_display', prompt: 'Search YouTube for tech news.', colorClass: 'youtube' },
   { id: 'translate', label: 'Translate', icon: 'translate', prompt: 'I want to translate something.', colorClass: 'translate' },
