@@ -1,0 +1,12 @@
+{
+  "apps": {
+    "eburon-imagegen": {
+      "repo_path": "/tmp",
+      "compose_file_allowlist": [
+        "docker/compose.prod.yml",
+        "docker/compose.staging.yml"
+      ],
+      "services_allowlist": ["api", "worker", "web"]
+    }
+  }
+}
