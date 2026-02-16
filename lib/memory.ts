@@ -17,9 +17,13 @@ interface MemoryState {
   initSession: () => void;
 }
 
+// User provided credentials:
+// URL: https://xscdwdnjujpkczfhqrgu.supabase.co
+// Key: sb_publishable_bboPqK7xbTCp7kTpWOFavw_w0Vucd4T
+
 export const useMemoryStore = create<MemoryState>((set, get) => ({
-  supabaseUrl: localStorage.getItem('eburon_supabase_url') || process.env.REACT_APP_SUPABASE_URL || '',
-  supabaseKey: localStorage.getItem('eburon_supabase_key') || process.env.REACT_APP_SUPABASE_KEY || '',
+  supabaseUrl: localStorage.getItem('eburon_supabase_url') || process.env.REACT_APP_SUPABASE_URL || 'https://xscdwdnjujpkczfhqrgu.supabase.co',
+  supabaseKey: localStorage.getItem('eburon_supabase_key') || process.env.REACT_APP_SUPABASE_KEY || 'sb_publishable_bboPqK7xbTCp7kTpWOFavw_w0Vucd4T',
   sessionId: localStorage.getItem('eburon_session_id') || `session-${Date.now()}`,
   
   setSupabaseConfig: (url: string, key: string) => {
@@ -121,24 +125,29 @@ export async function executeRecallMemory(args: any) {
   const limit = args.limit || 5;
   const query = args.query;
 
-  // Simple text search using ilike. 
-  // For production, use pg_vector and embeddings.
-  const { data, error } = await supabase
-    .from('messages')
-    .select('role, content, created_at')
-    .ilike('content', `%${query}%`)
-    .order('created_at', { ascending: false })
-    .limit(limit);
+  try {
+    // Simple text search using ilike. 
+    // For production, use pg_vector and embeddings.
+    const { data, error } = await supabase
+      .from('messages')
+      .select('role, content, created_at')
+      .ilike('content', `%${query}%`)
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
-  if (error) {
-    return { error: `Memory recall failed: ${error.message}` };
+    if (error) {
+      return { error: `Memory recall failed: ${error.message}` };
+    }
+
+    if (!data || data.length === 0) {
+      return { result: "No relevant memories found." };
+    }
+
+    return { 
+      result: data.map(m => `[${new Date(m.created_at).toLocaleString()}] ${m.role}: ${m.content}`).join('\n') 
+    };
+  } catch (e: any) {
+    console.error("Memory execution exception:", e);
+    return { error: `Memory recall execution failed: ${e.message}` };
   }
-
-  if (!data || data.length === 0) {
-    return { result: "No relevant memories found." };
-  }
-
-  return { 
-    result: data.map(m => `[${new Date(m.created_at).toLocaleString()}] ${m.role}: ${m.content}`).join('\n') 
-  };
 }

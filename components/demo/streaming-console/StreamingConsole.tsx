@@ -56,7 +56,7 @@ const renderContent = (text: string) => {
 
 export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();
-  const { systemPrompt, voice } = useSettings();
+  const { systemPrompt, voice, language } = useSettings();
   const { tools } = useTools();
   const turns = useLogStore(state => state.turns);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -104,6 +104,12 @@ export default function StreamingConsole() {
 
     // Append location to system prompt if available
     let finalSystemPrompt = systemPrompt;
+
+    // Handle Language Override
+    if (language && language !== 'Multilingual (Mixed)') {
+        finalSystemPrompt += `\n\n[System Context] LANGUAGE OVERRIDE: The user has explicitly selected "${language}" as the communication language. You MUST speak primarily in ${language} and demonstrate high fluency and cultural nuance in it. Ignore previous instructions about "Pan-Philippine" mixing if they conflict with speaking ${language} naturally.`;
+    }
+
     if (location) {
       finalSystemPrompt += `\n\n[System Context] User Location: Latitude ${location.lat}, Longitude ${location.lng}`;
     }
@@ -143,7 +149,7 @@ export default function StreamingConsole() {
     }
 
     setConfig(config);
-  }, [setConfig, systemPrompt, tools, voice, location]);
+  }, [setConfig, systemPrompt, tools, voice, location, language]);
 
   useEffect(() => {
     const { addTurn, updateLastTurn } = useLogStore.getState();

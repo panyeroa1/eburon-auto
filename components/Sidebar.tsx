@@ -2,9 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { FunctionCall, useSettings, useUI, useTools } from '@/lib/state';
+import { FunctionCall, useSettings, useUI, useTools, useConnectionStore } from '@/lib/state';
 import c from 'classnames';
-import { DEFAULT_LIVE_API_MODEL, AVAILABLE_VOICES } from '@/lib/constants';
+import { DEFAULT_LIVE_API_MODEL, AVAILABLE_VOICES, AVAILABLE_LANGUAGES } from '@/lib/constants';
 import { useLiveAPIContext } from '@/contexts/LiveAPIContext';
 import { useState } from 'react';
 import ToolEditorModal from './ToolEditorModal';
@@ -16,11 +16,12 @@ const AVAILABLE_MODELS = [
 
 export default function Sidebar() {
   const { isSidebarOpen, toggleSidebar } = useUI();
-  const { systemPrompt, model, voice, setSystemPrompt, setModel, setVoice } =
+  const { systemPrompt, model, voice, language, setSystemPrompt, setModel, setVoice, setLanguage } =
     useSettings();
   const { tools, toggleTool, addTool, removeTool, updateTool } = useTools();
   const { connected } = useLiveAPIContext();
   const { supabaseUrl, supabaseKey, setSupabaseConfig } = useMemoryStore();
+  const { toolBrokerUrl, toolBrokerApiKey, ollamaUrl, setToolBrokerUrl, setToolBrokerApiKey, setOllamaUrl } = useConnectionStore();
 
   const [editingTool, setEditingTool] = useState<FunctionCall | null>(null);
 
@@ -41,6 +42,36 @@ export default function Sidebar() {
           </button>
         </div>
         <div className="sidebar-content">
+          <div className="sidebar-section">
+            <h4 className="sidebar-section-title">Server Configuration</h4>
+            <label>
+              Tool Broker URL
+              <input
+                 type="text"
+                 value={toolBrokerUrl}
+                 onChange={(e) => setToolBrokerUrl(e.target.value)}
+                 placeholder="http://localhost:5040/v1/tools/execute"
+              />
+            </label>
+            <label>
+              Tool Broker API Key
+              <input
+                 type="password"
+                 value={toolBrokerApiKey}
+                 onChange={(e) => setToolBrokerApiKey(e.target.value)}
+                 placeholder="Authorization Bearer Token"
+              />
+            </label>
+            <label>
+              Ollama URL
+              <input
+                 type="text"
+                 value={ollamaUrl}
+                 onChange={(e) => setOllamaUrl(e.target.value)}
+                 placeholder="http://168.231.78.113/api/generate"
+              />
+            </label>
+          </div>
           <div className="sidebar-section">
             <h4 className="sidebar-section-title">Memory & Persistence</h4>
             <label>
@@ -65,6 +96,16 @@ export default function Sidebar() {
           <div className="sidebar-section">
             <h4 className="sidebar-section-title">Agent Config</h4>
             <fieldset disabled={connected}>
+              <label>
+                Language
+                <select value={language} onChange={e => setLanguage(e.target.value)}>
+                   {AVAILABLE_LANGUAGES.map(l => (
+                    <option key={l} value={l}>
+                      {l}
+                    </option>
+                   ))}
+                </select>
+              </label>
               <label>
                 System Prompt
                 <textarea
