@@ -212,9 +212,13 @@ export const useSettings = create<{
 export const useUI = create<{
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+  isRadarActive: boolean;
+  setRadarActive: (active: boolean) => void;
 }>(set => ({
   isSidebarOpen: true,
   toggleSidebar: () => set(state => ({ isSidebarOpen: !state.isSidebarOpen })),
+  isRadarActive: false,
+  setRadarActive: (active: boolean) => set({ isRadarActive: active }),
 }));
 
 /**

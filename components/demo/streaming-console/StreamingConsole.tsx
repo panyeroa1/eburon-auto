@@ -13,9 +13,11 @@ import {
   useSettings,
   useLogStore,
   useTools,
+  useUI,
   ConversationTurn,
 } from '@/lib/state';
 import { saveMessage, executeRecallMemory } from '@/lib/memory';
+import Radar from '../../console/radar/Radar';
 
 const formatTimestamp = (date: Date) => {
   const pad = (num: number, size = 2) => num.toString().padStart(size, '0');
@@ -59,10 +61,26 @@ export default function StreamingConsole() {
   const turns = useLogStore(state => state.turns);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showPopUp, setShowPopUp] = useState(true);
+  const [location, setLocation] = useState<{lat: number, lng: number} | undefined>(undefined);
+  const { setRadarActive } = useUI();
 
   const handleClosePopUp = () => {
     setShowPopUp(false);
   };
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+      },
+      (err) => {
+        console.warn("Geolocation permission denied or error:", err);
+      }
+    );
+  }, []);
 
   // Set the configuration for the Live API
   useEffect(() => {
@@ -77,6 +95,12 @@ export default function StreamingConsole() {
           },
         ],
       }));
+
+    // Add Google Maps tool if location is available
+    // Note: googleMaps tool is a built-in tool, not a function declaration.
+    // It is passed as an object key in the tools array.
+    const allTools = [...enabledTools];
+    allTools.push({ googleMaps: {} } as any);
 
     // Using `any` for config to accommodate `speechConfig`, which is not in the
     // current TS definitions but is used in the working reference example.
@@ -98,11 +122,22 @@ export default function StreamingConsole() {
           },
         ],
       },
-      tools: enabledTools,
+      tools: allTools,
     };
 
+    if (location) {
+        config.toolConfig = {
+            retrievalConfig: {
+                latLng: {
+                    latitude: location.lat,
+                    longitude: location.lng
+                }
+            }
+        };
+    }
+
     setConfig(config);
-  }, [setConfig, systemPrompt, tools, voice]);
+  }, [setConfig, systemPrompt, tools, voice, location]);
 
   useEffect(() => {
     const { addTurn, updateLastTurn } = useLogStore.getState();
@@ -121,10 +156,6 @@ export default function StreamingConsole() {
 
       if (isFinal) {
         // Save user message to memory
-        // We need to fetch the full text. If it was an update, 'text' is just the chunk? 
-        // No, 'text' in inputTranscription event is usually the chunk or full if isFinal.
-        // However, useLogStore has the accumulated text.
-        // A safer bet is to use the text passed here if isFinal is true for inputTranscription.
         saveMessage('user', text);
       }
     };
@@ -183,19 +214,10 @@ export default function StreamingConsole() {
       if (last && last.role === 'agent') {
         saveMessage('agent', last.text);
       }
+      
+      // Stop Radar when turn completes
+      setRadarActive(false);
     };
-
-    // Intercept tool calls for client-side memory handling
-    const originalSendToolResponse = client.sendToolResponse.bind(client);
-    // Note: We can't easily override client methods here without modifying the client class.
-    // Instead, we can listen for tool calls in useLiveApi, OR we can just rely on the fact 
-    // that 'recall_memory' needs to be handled.
-    // However, the `useLiveApi` hook handles tool calls. We should update the `useLiveApi` hook 
-    // to handle `recall_memory` client-side, OR we can add a specialized handler here if the architecture supported it.
-    // Since `useLiveApi` is where tool dispatch happens, I will modify `useLiveApi` logic via `hooks/media/use-live-api.ts`.
-    // But `useLiveApi` is in a different file. I will inject logic there if needed, 
-    // but the instruction was to "Give the agent the memory", implying the tool needs to work.
-    // I will modify `hooks/media/use-live-api.ts` in the next change block to handle `recall_memory`.
 
     client.on('inputTranscription', handleInputTranscription);
     client.on('outputTranscription', handleOutputTranscription);
@@ -208,7 +230,7 @@ export default function StreamingConsole() {
       client.off('content', handleContent);
       client.off('turncomplete', handleTurnComplete);
     };
-  }, [client]);
+  }, [client, setRadarActive]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -219,6 +241,7 @@ export default function StreamingConsole() {
   return (
     <div className="transcription-container">
       {showPopUp && <PopUp onClose={handleClosePopUp} />}
+      <Radar />
       {turns.length === 0 ? (
         <WelcomeScreen />
       ) : (
@@ -248,19 +271,31 @@ export default function StreamingConsole() {
                 <div className="grounding-chunks">
                   <strong>Sources:</strong>
                   <ul>
-                    {t.groundingChunks
-                      .filter(chunk => chunk.web?.uri) // FIX: Check for uri existence
-                      .map((chunk, index) => (
-                        <li key={index}>
-                          <a
-                            href={chunk.web?.uri}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {chunk.web?.title || chunk.web?.uri}
-                          </a>
-                        </li>
-                      ))}
+                    {t.groundingChunks.map((chunk: any, index) => {
+                       // Handle Web Grounding
+                       if (chunk.web?.uri) {
+                           return (
+                               <li key={index}>
+                                   <a href={chunk.web.uri} target="_blank" rel="noopener noreferrer">
+                                       {chunk.web.title || chunk.web.uri}
+                                   </a>
+                               </li>
+                           );
+                       }
+                       // Handle Maps Grounding
+                       // Structure: { maps: { uri: string, title: string } }
+                       if (chunk.maps?.uri) {
+                           return (
+                               <li key={index}>
+                                   <span className="icon" style={{fontSize: '1em', verticalAlign: 'middle', marginRight: '4px'}}>place</span>
+                                   <a href={chunk.maps.uri} target="_blank" rel="noopener noreferrer">
+                                       {chunk.maps.title || "Google Maps Location"}
+                                   </a>
+                               </li>
+                           );
+                       }
+                       return null;
+                    })}
                   </ul>
                 </div>
               )}

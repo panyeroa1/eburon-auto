@@ -38,6 +38,7 @@ export class AudioStreamer {
   public gainNode: GainNode;
   public source: AudioBufferSourceNode;
   private endOfQueueAudioSource: AudioBufferSourceNode | null = null;
+  private _gain: number = 1;
 
   public onComplete = () => {};
 
@@ -235,6 +236,7 @@ export class AudioStreamer {
     setTimeout(() => {
       this.gainNode.disconnect();
       this.gainNode = this.context.createGain();
+      this.gainNode.gain.value = this._gain;
       this.gainNode.connect(this.context.destination);
     }, 200);
   }
@@ -245,25 +247,20 @@ export class AudioStreamer {
     }
     this.isStreamComplete = false;
     this.scheduledTime = this.context.currentTime + this.initialBufferTime;
-    this.gainNode.gain.setValueAtTime(1, this.context.currentTime);
+    this.gainNode.gain.setValueAtTime(this._gain, this.context.currentTime);
   }
 
   complete() {
     this.isStreamComplete = true;
     this.onComplete();
   }
-}
 
-// // Usage example:
-// const audioStreamer = new AudioStreamer();
-//
-// // In your streaming code:
-// function handleChunk(chunk: Uint8Array) {
-//   audioStreamer.handleChunk(chunk);
-// }
-//
-// // To start playing (call this in response to a user interaction)
-// await audioStreamer.resume();
-//
-// // To stop playing
-// // audioStreamer.stop();
+  set gain(value: number) {
+    this._gain = value;
+    this.gainNode.gain.setValueAtTime(value, this.context.currentTime);
+  }
+
+  get gain() {
+    return this._gain;
+  }
+}

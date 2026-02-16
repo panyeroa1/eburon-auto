@@ -20,9 +20,9 @@
 
 import cn from 'classnames';
 
-import { memo, ReactNode, useEffect, useRef, useState } from 'react';
+import { memo, ReactNode, useEffect, useRef, useState, useCallback } from 'react';
 import { AudioRecorder } from '../../../lib/audio-recorder';
-import { useSettings, useTools, useLogStore } from '@/lib/state';
+import { useLogStore, useUI } from '@/lib/state';
 
 import { useLiveAPIContext } from '../../../contexts/LiveAPIContext';
 
@@ -33,14 +33,17 @@ export type ControlTrayProps = {
 function ControlTray({ children }: ControlTrayProps) {
   const [audioRecorder] = useState(() => new AudioRecorder());
   const [muted, setMuted] = useState(false);
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const connectButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { client, connected, connect, disconnect } = useLiveAPIContext();
+  const { client, connected, connect, disconnect, isVolumeMuted, mute, unmute } = useLiveAPIContext();
+  const { isRadarActive, setRadarActive } = useUI();
 
   useEffect(() => {
-    // FIX: Cannot find name 'connectButton'. Did you mean 'connectButtonRef'?
     if (!connected && connectButtonRef.current) {
-      // FIX: Cannot find name 'connectButton'. Did you mean 'connectButtonRef'?
       connectButtonRef.current.focus();
     }
   }, [connected]);
@@ -48,9 +51,16 @@ function ControlTray({ children }: ControlTrayProps) {
   useEffect(() => {
     if (!connected) {
       setMuted(false);
+      setVideoEnabled(false);
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        setVideoStream(null);
+      }
+      setRadarActive(false);
     }
-  }, [connected]);
+  }, [connected, setRadarActive]);
 
+  // Handle Audio Input
   useEffect(() => {
     const onData = (base64: string) => {
       client.sendRealtimeInput([
@@ -71,6 +81,70 @@ function ControlTray({ children }: ControlTrayProps) {
     };
   }, [connected, client, muted, audioRecorder]);
 
+  // Handle Video Input
+  const toggleVideo = useCallback(async () => {
+    if (videoEnabled) {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        setVideoStream(null);
+      }
+      setVideoEnabled(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setVideoStream(stream);
+        setVideoEnabled(true);
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+      }
+    }
+  }, [videoEnabled, videoStream]);
+
+  useEffect(() => {
+    if (videoRef.current && videoStream) {
+      videoRef.current.srcObject = videoStream;
+    }
+  }, [videoStream]);
+
+  useEffect(() => {
+    if (!connected || !videoEnabled || !videoRef.current || !canvasRef.current) return;
+
+    const interval = setInterval(() => {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (!video || !canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const base64 = canvas.toDataURL('image/jpeg').split(',')[1];
+        
+        client.sendRealtimeInput([
+          {
+            mimeType: 'image/jpeg',
+            data: base64,
+          }
+        ]);
+      }
+    }, 1000 / 5); // 5 FPS
+
+    return () => clearInterval(interval);
+  }, [connected, videoEnabled, client]);
+
+  // Handle Speaker Mute
+  const toggleSpeaker = () => {
+    if (isVolumeMuted) {
+      unmute();
+    } else {
+      mute();
+    }
+  };
+
   const handleMicClick = () => {
     if (connected) {
       setMuted(!muted);
@@ -79,35 +153,19 @@ function ControlTray({ children }: ControlTrayProps) {
     }
   };
 
-  const handleExportLogs = () => {
-    const { systemPrompt, model } = useSettings.getState();
-    const { tools } = useTools.getState();
-    const { turns } = useLogStore.getState();
-
-    const logData = {
-      configuration: {
-        model,
-        systemPrompt,
-      },
-      tools,
-      conversation: turns.map(turn => ({
-        ...turn,
-        // Convert Date object to ISO string for JSON serialization
-        timestamp: turn.timestamp.toISOString(),
-      })),
-    };
-
-    const jsonString = JSON.stringify(logData, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    a.href = url;
-    a.download = `live-api-logs-${timestamp}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // Handle Radar Scan
+  const handleRadarScan = () => {
+    if (!connected) return;
+    setRadarActive(true);
+    // Send a prompt to the agent to look around
+    client.send([{ text: "Scan my surroundings and tell me what is near me. Use the map." }]);
+    
+    // Add to log manually
+    useLogStore.getState().addTurn({
+        role: 'user',
+        text: "Scan my surroundings and tell me what is near me.",
+        isFinal: true
+    });
   };
 
   const micButtonTitle = connected
@@ -117,9 +175,16 @@ function ControlTray({ children }: ControlTrayProps) {
     : 'Connect and start microphone';
 
   const connectButtonTitle = connected ? 'Stop streaming' : 'Start streaming';
+  const videoButtonTitle = videoEnabled ? 'Turn off camera' : 'Turn on camera';
+  const speakerButtonTitle = isVolumeMuted ? 'Unmute speaker' : 'Mute speaker';
+  const radarButtonTitle = "Scan surroundings (Near Me)";
 
   return (
     <section className="control-tray">
+      {/* Hidden elements for media capture */}
+      <video ref={videoRef} autoPlay playsInline muted style={{ display: 'none' }} />
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+
       <nav className={cn('actions-nav')}>
         <button
           className={cn('action-button mic-button')}
@@ -132,14 +197,38 @@ function ControlTray({ children }: ControlTrayProps) {
             <span className="material-symbols-outlined filled">mic_off</span>
           )}
         </button>
+
+        <button
+          className={cn('action-button', { active: videoEnabled })}
+          onClick={toggleVideo}
+          title={videoButtonTitle}
+          disabled={!connected}
+        >
+          <span className="material-symbols-outlined filled">
+            {videoEnabled ? 'videocam' : 'videocam_off'}
+          </span>
+        </button>
+
         <button
           className={cn('action-button')}
-          onClick={handleExportLogs}
-          aria-label="Export Logs"
-          title="Export session logs"
+          onClick={toggleSpeaker}
+          title={speakerButtonTitle}
+          disabled={!connected}
         >
-          <span className="icon">download</span>
+          <span className="material-symbols-outlined filled">
+            {isVolumeMuted ? 'volume_off' : 'volume_up'}
+          </span>
         </button>
+
+        <button
+          className={cn('action-button', { active: isRadarActive })}
+          onClick={handleRadarScan}
+          title={radarButtonTitle}
+          disabled={!connected}
+        >
+           <span className="material-symbols-outlined filled">radar</span>
+        </button>
+
         <button
           className={cn('action-button')}
           onClick={useLogStore.getState().clearTurns}

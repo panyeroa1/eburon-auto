@@ -37,6 +37,11 @@ export type UseLiveApiResults = {
   connected: boolean;
 
   volume: number;
+  
+  // Audio output control
+  isVolumeMuted: boolean;
+  mute: () => void;
+  unmute: () => void;
 };
 
 export function useLiveApi({
@@ -52,6 +57,7 @@ export function useLiveApi({
   const [volume, setVolume] = useState(0);
   const [connected, setConnected] = useState(false);
   const [config, setConfig] = useState<LiveConnectConfig>({});
+  const [isVolumeMuted, setIsVolumeMuted] = useState(false);
 
   // register audio for streaming server -> speakers
   useEffect(() => {
@@ -215,6 +221,20 @@ export function useLiveApi({
     setConnected(false);
   }, [setConnected, client]);
 
+  const mute = useCallback(() => {
+    setIsVolumeMuted(true);
+    if (audioStreamerRef.current) {
+        audioStreamerRef.current.gain = 0;
+    }
+  }, []);
+
+  const unmute = useCallback(() => {
+    setIsVolumeMuted(false);
+    if (audioStreamerRef.current) {
+        audioStreamerRef.current.gain = 1;
+    }
+  }, []);
+
   return {
     client,
     config,
@@ -223,5 +243,8 @@ export function useLiveApi({
     connected,
     disconnect,
     volume,
+    isVolumeMuted,
+    mute,
+    unmute
   };
 }
