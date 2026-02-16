@@ -11,6 +11,7 @@ import { vpsManagementTools } from './vps-management';
 import { creativeStudioTools } from './creative-studio';
 import { memoryTools } from '../memory';
 import { localModelTools } from './local-models';
+import { radarTools } from './radar';
 import { FunctionCall } from '../state';
 
 export const orbitMaxTools: FunctionCall[] = [
@@ -22,4 +23,5 @@ export const orbitMaxTools: FunctionCall[] = [
   ...creativeStudioTools,
   ...memoryTools,
   ...localModelTools,
+  ...radarTools,
 ];

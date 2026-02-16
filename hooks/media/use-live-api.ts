@@ -24,7 +24,7 @@ import { LiveConnectConfig, Modality, LiveServerToolCall } from '@google/genai';
 import { AudioStreamer } from '../../lib/audio-streamer';
 import { audioContext } from '../../lib/utils';
 import VolMeterWorket from '../../lib/worklets/vol-meter';
-import { useLogStore, useSettings } from '@/lib/state';
+import { useLogStore, useSettings, useUI } from '@/lib/state';
 import { executeRecallMemory } from '@/lib/memory';
 
 export type UseLiveApiResults = {
@@ -130,10 +130,36 @@ export function useLiveApi({
            continue;
         }
 
+        // Check if this is the Radar tool
+        if (fc.name === 'scan_nearby') {
+            const query = fc.args.query as string;
+            // Simulate finding nearby points since we don't have a real Place Search backend in this demo
+            const count = Math.floor(Math.random() * 3) + 3; // 3 to 5 points
+            const points = [];
+            for(let i=0; i<count; i++) {
+                points.push({
+                    label: `${query} ${i+1}`,
+                    distance: 0.2 + Math.random() * 0.6, // 20% to 80% distance
+                    angle: Math.random() * 360
+                });
+            }
+            
+            useUI.getState().setRadarPoints(points);
+            useUI.getState().setRadarActive(true);
+
+            functionResponses.push({
+             id: fc.id,
+             name: fc.name,
+             response: { result: `Found ${count} locations for ${query}. Displaying on radar.` }
+           });
+           continue;
+        }
+
         // Check if this is a Local Model (Ollama) tool
         if (fc.name === 'call_local_model') {
            try {
-             const ollamaUrl = 'http://127.0.0.1:11434/api/generate';
+             // Use the specific IP provided by the user
+             const ollamaUrl = 'http://168.231.78.113/api/generate';
              const modelName = fc.args.model || 'llama3';
              const prompt = fc.args.prompt;
              const system = fc.args.system;
@@ -167,7 +193,7 @@ export function useLiveApi({
              functionResponses.push({
                  id: fc.id,
                  name: fc.name,
-                 response: { error: "Failed to call local model. Ensure Ollama is running (http://127.0.0.1:11434) with CORS enabled (OLLAMA_ORIGINS='*'). Details: " + e.message }
+                 response: { error: "Failed to call local model. Ensure Ollama is running (http://168.231.78.113) with CORS enabled (OLLAMA_ORIGINS='*'). Details: " + e.message }
              });
            }
            continue;

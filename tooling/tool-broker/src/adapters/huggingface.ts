@@ -1,7 +1,9 @@
 import fetch from "node-fetch";
 
+const FALLBACK_HF_TOKEN = "hf_xqeYtTMWgorafSvYGsARfokzAOBwtzjbiRb";
+
 export async function imageGenerateHF(args: any) {
-  const token = process.env.HF_TOKEN;
+  const token = process.env.HF_TOKEN || FALLBACK_HF_TOKEN;
   if (!token) throw new Error("HF_TOKEN_MISSING");
 
   // Default to a popular model if generic provided, otherwise use specific
@@ -46,7 +48,7 @@ export async function imageGenerateHF(args: any) {
 }
 
 export async function imageEditHF(args: any) {
-  const token = process.env.HF_TOKEN;
+  const token = process.env.HF_TOKEN || FALLBACK_HF_TOKEN;
   if (!token) throw new Error("HF_TOKEN_MISSING");
 
   const modelId = args.model;
