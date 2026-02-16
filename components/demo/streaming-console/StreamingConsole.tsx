@@ -96,10 +96,10 @@ export default function StreamingConsole() {
         ],
       }));
 
-    // Add Google Maps tool if location is available
-    // Note: googleMaps tool is a built-in tool, not a function declaration.
-    // It is passed as an object key in the tools array.
+    // Add built-in tools: Google Maps and Google Search
+    // These are passed as object keys in the tools array alongside function declarations.
     const allTools = [...enabledTools];
+    allTools.push({ googleSearch: {} } as any);
     allTools.push({ googleMaps: {} } as any);
 
     // Using `any` for config to accommodate `speechConfig`, which is not in the

@@ -195,6 +195,11 @@ export function useLiveApi({
               })
             });
             
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Broker error (${response.status}): ${errorText}`);
+            }
+
             const result = await response.json();
             
             functionResponses.push({
@@ -205,10 +210,14 @@ export function useLiveApi({
 
           } catch (e: any) {
              console.error("Tool Broker Error", e);
+             const errorMessage = e.message === 'Failed to fetch' 
+                ? 'Tool Broker service is unreachable. Is it running on port 5040?' 
+                : e.message;
+
              functionResponses.push({
               id: fc.id,
               name: fc.name,
-              response: { error: e.message }
+              response: { error: errorMessage }
             });
           }
 
