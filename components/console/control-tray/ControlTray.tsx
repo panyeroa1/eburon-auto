@@ -229,14 +229,6 @@ function ControlTray({ children }: ControlTrayProps) {
            <span className="material-symbols-outlined filled">radar</span>
         </button>
 
-        <button
-          className={cn('action-button')}
-          onClick={useLogStore.getState().clearTurns}
-          aria-label="Reset Chat"
-          title="Reset session logs"
-        >
-          <span className="icon">refresh</span>
-        </button>
         {children}
       </nav>
 

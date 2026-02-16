@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { useUI } from '@/lib/state';
+import { useUI, useLogStore } from '@/lib/state';
 
 export default function Header() {
   const { toggleSidebar } = useUI();
@@ -13,6 +13,14 @@ export default function Header() {
         <h1>Eburon Automation</h1>
       </div>
       <div className="header-right">
+        <button
+          className="settings-button"
+          onClick={useLogStore.getState().clearTurns}
+          aria-label="Reset Chat"
+          title="Reset session logs"
+        >
+          <span className="icon">refresh</span>
+        </button>
         <button
           className="settings-button"
           onClick={toggleSidebar}

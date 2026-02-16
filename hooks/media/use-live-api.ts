@@ -130,6 +130,49 @@ export function useLiveApi({
            continue;
         }
 
+        // Check if this is a Local Model (Ollama) tool
+        if (fc.name === 'call_local_model') {
+           try {
+             const ollamaUrl = 'http://127.0.0.1:11434/api/generate';
+             const modelName = fc.args.model || 'llama3';
+             const prompt = fc.args.prompt;
+             const system = fc.args.system;
+
+             // Note: User must run Ollama with OLLAMA_ORIGINS="*" to allow browser access
+             const response = await fetch(ollamaUrl, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({
+                     model: modelName,
+                     prompt: prompt,
+                     system: system,
+                     stream: false
+                 })
+             });
+
+             if (!response.ok) {
+                 const errorText = await response.text();
+                 throw new Error(`Ollama API error (${response.status}): ${errorText}`);
+             }
+
+             const data = await response.json();
+             functionResponses.push({
+                 id: fc.id,
+                 name: fc.name,
+                 response: { result: data.response }
+             });
+
+           } catch (e: any) {
+             console.error("Local Model Tool Error", e);
+             functionResponses.push({
+                 id: fc.id,
+                 name: fc.name,
+                 response: { error: "Failed to call local model. Ensure Ollama is running (http://127.0.0.1:11434) with CORS enabled (OLLAMA_ORIGINS='*'). Details: " + e.message }
+             });
+           }
+           continue;
+        }
+
         // Check if this is a VPS or Image tool that needs the broker
         const isBrokerTool = fc.name.startsWith('vps_') || fc.name.startsWith('image_');
 

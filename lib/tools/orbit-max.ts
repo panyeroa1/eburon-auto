@@ -10,6 +10,7 @@ import { browserAutomationTools } from './browser-automation';
 import { vpsManagementTools } from './vps-management';
 import { creativeStudioTools } from './creative-studio';
 import { memoryTools } from '../memory';
+import { localModelTools } from './local-models';
 import { FunctionCall } from '../state';
 
 export const orbitMaxTools: FunctionCall[] = [
@@ -20,4 +21,5 @@ export const orbitMaxTools: FunctionCall[] = [
   ...vpsManagementTools,
   ...creativeStudioTools,
   ...memoryTools,
+  ...localModelTools,
 ];
