@@ -1,6 +1,15 @@
-import { ImageGenerateArgs, ImageEditArgs, VpsDeployComposeArgs, VpsRestartServiceArgs, VpsGetStatusArgs } from "./tools.schemas";
+import { 
+  ImageGenerateArgs, ImageEditArgs, 
+  VpsDeployComposeArgs, VpsRestartServiceArgs, VpsGetStatusArgs,
+  VpsRollbackReleaseArgs, VpsGetLogsArgs, VpsSystemStatsArgs,
+  VpsReadFileArgs, VpsListDirectoryArgs, VpsRunCommandArgs
+} from "./tools.schemas";
 import { imageGenerate, imageEdit } from "./adapters";
-import { vpsDeployCompose, vpsRestartService, vpsGetStatus } from "./vps/runnerClient";
+import { 
+  vpsDeployCompose, vpsRestartService, vpsGetStatus,
+  vpsRollbackRelease, vpsGetLogs, vpsSystemStats,
+  vpsReadFile, vpsListDirectory, vpsRunCommand
+} from "./vps/runnerClient";
 
 export const toolRegistry = {
   image_generate: {
@@ -15,6 +24,10 @@ export const toolRegistry = {
     validate: (args: any) => VpsDeployComposeArgs.parse(args),
     execute: (args: any) => vpsDeployCompose(args)
   },
+  vps_rollback_release: {
+    validate: (args: any) => VpsRollbackReleaseArgs.parse(args),
+    execute: (args: any) => vpsRollbackRelease(args)
+  },
   vps_restart_service: {
     validate: (args: any) => VpsRestartServiceArgs.parse(args),
     execute: (args: any) => vpsRestartService(args)
@@ -22,6 +35,26 @@ export const toolRegistry = {
   vps_get_status: {
     validate: (args: any) => VpsGetStatusArgs.parse(args),
     execute: (args: any) => vpsGetStatus(args)
+  },
+  vps_get_logs: {
+    validate: (args: any) => VpsGetLogsArgs.parse(args),
+    execute: (args: any) => vpsGetLogs(args)
+  },
+  vps_system_stats: {
+    validate: (args: any) => VpsSystemStatsArgs.parse(args),
+    execute: (args: any) => vpsSystemStats(args)
+  },
+  vps_read_file: {
+    validate: (args: any) => VpsReadFileArgs.parse(args),
+    execute: (args: any) => vpsReadFile(args)
+  },
+  vps_list_directory: {
+    validate: (args: any) => VpsListDirectoryArgs.parse(args),
+    execute: (args: any) => vpsListDirectory(args)
+  },
+  vps_run_command: {
+    validate: (args: any) => VpsRunCommandArgs.parse(args),
+    execute: (args: any) => vpsRunCommand(args)
   }
 } as const;
 

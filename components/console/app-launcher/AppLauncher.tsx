@@ -28,6 +28,7 @@ const APPS: AppConfig[] = [
   { id: 'slack', label: 'Slack', icon: 'forum', prompt: 'Send a message to the #general channel on Slack.', colorClass: 'slack' },
   { id: 'ssh', label: 'SSH', icon: 'terminal', prompt: 'Connect to the VPS via SSH and run "uptime".', colorClass: 'ssh' },
   { id: 'code', label: 'Code', icon: 'code', prompt: 'Use the local model to write a Python script.', colorClass: 'code' },
+  { id: 'ollama', label: 'Ollama', icon: 'smart_toy', prompt: 'Use the local Ollama model to answer a question.', colorClass: 'code' },
   { id: 'youtube', label: 'YouTube', icon: 'smart_display', prompt: 'Search YouTube for tech news.', colorClass: 'youtube' },
   { id: 'translate', label: 'Translate', icon: 'translate', prompt: 'I want to translate something.', colorClass: 'translate' },
   { id: 'photos', label: 'Photos', icon: 'photo_library', prompt: 'Show me my recent photos.', colorClass: 'photos' },

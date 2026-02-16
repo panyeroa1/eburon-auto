@@ -16,8 +16,6 @@ export async function deployCompose(args: { app_id: string; git_ref: string; com
   const cwd = cfg.repo_path;
   const logs: string[] = [];
 
-  // In a real environment, we would actually run these commands. 
-  // For the sandbox, we'll mock successful execution if the checks pass.
   logs.push(`[SIMULATION] cd ${cwd}`);
   logs.push(`[SIMULATION] git fetch --all --tags`);
   logs.push(`[SIMULATION] git checkout ${args.git_ref}`);
@@ -25,14 +23,22 @@ export async function deployCompose(args: { app_id: string; git_ref: string; com
   logs.push(`[SIMULATION] docker compose -f ${args.compose_file} pull`);
   logs.push(`[SIMULATION] docker compose -f ${args.compose_file} up -d --remove-orphans`);
 
-  // To run real commands, uncomment:
-  /*
-  await execFileAsync("git", ["fetch", "--all", "--tags"], { cwd });
-  await execFileAsync("git", ["checkout", args.git_ref], { cwd });
-  // ... rest of docker logic
-  */
-
   return { ok: true, logs, status: "deployed" };
+}
+
+export async function rollbackRelease(args: { app_id: string; git_ref: string; }) {
+    const cfg = getAppConfig(args.app_id);
+    assertSafeRef(args.git_ref);
+    const cwd = cfg.repo_path;
+    const logs: string[] = [];
+
+    logs.push(`[SIMULATION] Rolling back ${args.app_id} to ${args.git_ref}`);
+    logs.push(`[SIMULATION] cd ${cwd}`);
+    logs.push(`[SIMULATION] git checkout ${args.git_ref}`);
+    // Assuming default compose file if not specified, or just generic up
+    logs.push(`[SIMULATION] docker compose up -d`);
+    
+    return { ok: true, logs, status: "rolled_back" };
 }
 
 export async function restartService(args: { app_id: string; service?: string }) {
@@ -40,12 +46,35 @@ export async function restartService(args: { app_id: string; service?: string })
   if (args.service && cfg.services_allowlist && !cfg.services_allowlist.includes(args.service)) {
     throw new Error("service_not_allowlisted");
   }
-  // Mock
   return { ok: true, logs: [`[SIMULATION] docker compose restart ${args.service ?? "(all)"}`] };
 }
 
 export async function getStatus(args: { app_id: string }) {
-  getAppConfig(args.app_id); // validate app exists
-  // Mock status
+  getAppConfig(args.app_id); 
   return { ok: true, data: { ps: "NAME      IMAGE     COMMAND   SERVICE   CREATED         STATUS         PORTS\nweb-1     nginx     ...       web       2 minutes ago   Up 2 minutes   80/tcp" } };
+}
+
+export async function getLogs(args: { app_id: string; service?: string; lines?: number }) {
+  getAppConfig(args.app_id);
+  return { ok: true, logs: `[2024-05-21 12:00:00] [INFO] Service ${args.service || 'app'} started.\n[2024-05-21 12:01:00] [INFO] Handling request...` };
+}
+
+export async function getSystemStats(args: {}) {
+  // Real implementation would use 'uptime', 'free', 'df'
+  return { ok: true, stats: "Uptime: 14 days.\nLoad: 0.25 0.18 0.15\nMem: 4GB/16GB\nDisk: 40% used." };
+}
+
+export async function readFile(args: { file_path: string }) {
+  // Security: In real app, validate path against allowlist or chroot
+  return { ok: true, content: `# Simulated content of ${args.file_path}\nKEY=VALUE\n` };
+}
+
+export async function listDirectory(args: { path: string }) {
+  // Security: Validate path
+  return { ok: true, files: ["docker-compose.yml", ".env", "src/"] };
+}
+
+export async function runCommand(args: { command: string }) {
+  // DANGEROUS: In production this must be heavily restricted
+  return { ok: true, logs: [`[SIMULATION] Executing: ${args.command}`, "Done."] };
 }

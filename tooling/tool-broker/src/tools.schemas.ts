@@ -41,6 +41,11 @@ export const VpsDeployComposeArgs = z.object({
   force_rebuild: z.boolean().optional()
 });
 
+export const VpsRollbackReleaseArgs = z.object({
+  app_id: z.string().min(1),
+  git_ref: z.string().min(1).max(80)
+});
+
 export const VpsRestartServiceArgs = z.object({
   app_id: z.string().min(1),
   service: z.string().optional()
@@ -48,4 +53,24 @@ export const VpsRestartServiceArgs = z.object({
 
 export const VpsGetStatusArgs = z.object({
   app_id: z.string().min(1)
+});
+
+export const VpsGetLogsArgs = z.object({
+  app_id: z.string().min(1),
+  service: z.string().optional(),
+  lines: z.number().int().optional()
+});
+
+export const VpsSystemStatsArgs = z.object({});
+
+export const VpsReadFileArgs = z.object({
+  file_path: z.string().min(1)
+});
+
+export const VpsListDirectoryArgs = z.object({
+  path: z.string().min(1)
+});
+
+export const VpsRunCommandArgs = z.object({
+  command: z.string().min(1)
 });

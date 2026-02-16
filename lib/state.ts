@@ -134,6 +134,10 @@ VPS & System:
 - vps_restart_service(app_id, service?)
 - vps_get_status(app_id)
 - vps_rollback_release(app_id, git_ref)
+- vps_get_logs(app_id, service?, lines?)
+- vps_system_stats()
+- vps_read_file(file_path)
+- vps_list_directory(path)
 - vps_run_command(command)  <-- Executed as root@168.231.78.113
 
 Local Intelligence:
@@ -148,6 +152,7 @@ Other:
 - slack_send_message(channel, message)
 - recall_memory(query)
 - save_memory(content, category?)
+- google_translate(text, targetLanguage)
 
 ## 4) Safety Gates (Non-Negotiable)
 ### 4.1 Execution Policies

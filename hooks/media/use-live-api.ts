@@ -203,7 +203,7 @@ export function useLiveApi({
          if (fc.name === 'google_translate') {
              functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Translated to ${fc.args.targetLanguage}: [Simulated Translation]` }
+                response: { result: `[Simulated Translation to ${fc.args.targetLanguage}]: ${fc.args.text} -> (Translated Content)` }
             });
             continue;
         }
@@ -396,8 +396,21 @@ export function useLiveApi({
                     result: `[SIMULATION] Deploying ${fc.args.app_id} (ref: ${fc.args.git_ref || 'latest'})...`,
                     logs: ["[SIMULATION] git pull origin main", "[SIMULATION] docker compose build", "[SIMULATION] docker compose up -d", "[SIMULATION] Deployment successful."] 
                  };
+             } else if (fc.name === 'vps_rollback_release') {
+                 mockResult = { 
+                    result: `[SIMULATION] Rolled back ${fc.args.app_id} to ${fc.args.git_ref}.`,
+                    logs: ["[SIMULATION] git checkout " + fc.args.git_ref, "[SIMULATION] docker compose up -d", "[SIMULATION] Rollback successful."] 
+                 };
              } else if (fc.name === 'vps_get_status') {
                  mockResult = { result: { ps: `NAME      IMAGE     STATUS\n${fc.args.app_id}     latest    Up 42 minutes` } };
+             } else if (fc.name === 'vps_get_logs') {
+                 mockResult = { result: { logs: `[2024-05-21 12:00:01] INFO: Started service ${fc.args.app_id}\n[2024-05-21 12:05:22] INFO: Processed 24 requests.` } };
+             } else if (fc.name === 'vps_system_stats') {
+                 mockResult = { result: { stats: "Uptime: 14 days 3 hours.\nLoad Average: 0.45, 0.32, 0.28\nMemory: 4.2GB / 16GB used.\nDisk: 45% used (120GB free)." } };
+             } else if (fc.name === 'vps_read_file') {
+                 mockResult = { result: { content: `# Simulated file content for ${fc.args.file_path}\nversion: '3.8'\nservices:\n  app:\n    image: node:18\n` } };
+             } else if (fc.name === 'vps_list_directory') {
+                 mockResult = { result: { files: ["docker-compose.yml", ".env", "src/", "README.md"] } };
              } else if (fc.name.startsWith('image_')) {
                  // 1x1 Blue Pixel to prevent broken images
                  const mockB64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMObbbAAAAABJRU5ErkJggg==";

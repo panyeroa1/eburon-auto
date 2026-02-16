@@ -153,8 +153,8 @@ export const googleServiceTools: FunctionCall[] = [
     parameters: {
       type: Type.OBJECT,
       properties: {
-        text: { type: Type.STRING },
-        targetLanguage: { type: Type.STRING }
+        text: { type: Type.STRING, description: 'The text to translate.' },
+        targetLanguage: { type: Type.STRING, description: 'The target language code (e.g., "es", "fr", "ja").' }
       },
       required: ['text', 'targetLanguage']
     },
