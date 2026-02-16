@@ -3,13 +3,14 @@ import {
   VpsDeployComposeArgs, VpsRestartServiceArgs, VpsGetStatusArgs,
   VpsRollbackReleaseArgs, VpsGetLogsArgs, VpsSystemStatsArgs,
   VpsReadFileArgs, VpsListDirectoryArgs, VpsRunCommandArgs,
+  VpsExecuteCommandArgs,
   OllamaPullArgs, OllamaListArgs, OllamaPsArgs, OllamaRmArgs
 } from "./tools.schemas";
 import { imageGenerate, imageEdit } from "./adapters";
 import { 
   vpsDeployCompose, vpsRestartService, vpsGetStatus,
   vpsRollbackRelease, vpsGetLogs, vpsSystemStats,
-  vpsReadFile, vpsListDirectory, vpsRunCommand,
+  vpsReadFile, vpsListDirectory, vpsRunCommand, vpsExecuteCommand,
   ollamaPull, ollamaList, ollamaPs, ollamaRm
 } from "./vps/runnerClient";
 
@@ -57,6 +58,10 @@ export const toolRegistry = {
   vps_run_command: {
     validate: (args: any) => VpsRunCommandArgs.parse(args),
     execute: (args: any) => vpsRunCommand(args)
+  },
+  vps_execute_command: {
+    validate: (args: any) => VpsExecuteCommandArgs.parse(args),
+    execute: (args: any) => vpsExecuteCommand(args)
   },
   ollama_pull: {
     validate: (args: any) => OllamaPullArgs.parse(args),

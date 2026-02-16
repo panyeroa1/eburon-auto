@@ -2,6 +2,7 @@ import express from "express";
 import { 
   deployCompose, restartService, getStatus, rollbackRelease, 
   getLogs, getSystemStats, readFile, listDirectory, runCommand,
+  executeCommand,
   ollamaPull, ollamaList, ollamaPs, ollamaRm
 } from "./actions";
 
@@ -35,6 +36,7 @@ app.post("/v1/system/stats", requireRunnerToken, wrap(getSystemStats));
 app.post("/v1/file/read", requireRunnerToken, wrap(readFile));
 app.post("/v1/file/list", requireRunnerToken, wrap(listDirectory));
 app.post("/v1/system/command", requireRunnerToken, wrap(runCommand));
+app.post("/v1/system/execute", requireRunnerToken, wrap(executeCommand));
 
 // Ollama Routes
 app.post("/v1/ollama/pull", requireRunnerToken, wrap(ollamaPull));

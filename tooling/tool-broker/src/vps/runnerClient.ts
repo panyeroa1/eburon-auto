@@ -62,6 +62,11 @@ export async function vpsRunCommand(args: any) {
   return { data: json, logs: json?.logs ?? [] };
 }
 
+export async function vpsExecuteCommand(args: any) {
+  const json = await post("/v1/system/execute", args);
+  return { data: json, logs: json?.logs ?? [] };
+}
+
 export async function ollamaPull(args: any) {
   const json = await post("/v1/ollama/pull", args);
   return { data: json, logs: json?.logs ?? [] };

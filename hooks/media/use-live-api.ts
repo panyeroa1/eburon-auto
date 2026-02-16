@@ -134,7 +134,7 @@ export function useLiveApi({
         if (fc.name === 'google_calendar_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Event created: ${fc.args.summary} at ${fc.args.startTime}` }
+                response: { result: `Event created: ${(fc.args as any).summary} at ${(fc.args as any).startTime}` }
             });
             continue;
         }
@@ -151,7 +151,7 @@ export function useLiveApi({
         if (fc.name === 'gmail_send') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Email sent to ${fc.args.to}` }
+                response: { result: `Email sent to ${(fc.args as any).to}` }
             });
             continue;
         }
@@ -168,28 +168,28 @@ export function useLiveApi({
         if (fc.name === 'google_docs_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Created Google Doc: "${fc.args.title}" (https://docs.google.com/document/d/mock-id)` }
+                response: { result: `Created Google Doc: "${(fc.args as any).title}" (https://docs.google.com/document/d/mock-id)` }
             });
             continue;
         }
         if (fc.name === 'google_sheets_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Created Google Sheet: "${fc.args.title}" (https://docs.google.com/spreadsheets/d/mock-id)` }
+                response: { result: `Created Google Sheet: "${(fc.args as any).title}" (https://docs.google.com/spreadsheets/d/mock-id)` }
             });
             continue;
         }
         if (fc.name === 'google_slides_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Created Google Slides: "${fc.args.title}" (https://docs.google.com/presentation/d/mock-id)` }
+                response: { result: `Created Google Slides: "${(fc.args as any).title}" (https://docs.google.com/presentation/d/mock-id)` }
             });
             continue;
         }
         if (fc.name === 'google_keep_create') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Created Keep Note: "${fc.args.title || 'Untitled'}"` }
+                response: { result: `Created Keep Note: "${(fc.args as any).title || 'Untitled'}"` }
             });
             continue;
         }
@@ -203,7 +203,7 @@ export function useLiveApi({
          if (fc.name === 'google_translate') {
              functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `[Simulated Translation to ${fc.args.targetLanguage}]: ${fc.args.text} -> (Translated Content)` }
+                response: { result: `[Simulated Translation to ${(fc.args as any).targetLanguage}]: ${(fc.args as any).text} -> (Translated Content)` }
             });
             continue;
         }
@@ -212,7 +212,7 @@ export function useLiveApi({
         if (fc.name === 'slack_send_message') {
             functionResponses.push({
                 id: fc.id, name: fc.name,
-                response: { result: `Message sent to #${fc.args.channel}: "${fc.args.message}"` }
+                response: { result: `Message sent to #${(fc.args as any).channel}: "${(fc.args as any).message}"` }
             });
             continue;
         }
@@ -243,9 +243,9 @@ export function useLiveApi({
 
         // Check if this is the Radar tool
         if (fc.name === 'scan_nearby') {
-            const query = fc.args.query as string;
-            const lat = fc.args.latitude as number | undefined;
-            const lng = fc.args.longitude as number | undefined;
+            const query = (fc.args as any).query as string;
+            const lat = (fc.args as any).latitude as number | undefined;
+            const lng = (fc.args as any).longitude as number | undefined;
             
             // Simulate finding nearby points since we don't have a real Place Search backend in this demo
             const count = Math.floor(Math.random() * 3) + 3; // 3 to 5 points
@@ -278,9 +278,9 @@ export function useLiveApi({
         if (fc.name === 'call_local_model') {
            try {
              // Use the specific IP provided by the user (now from store)
-             const modelName = fc.args.model || 'llama3';
-             const prompt = fc.args.prompt;
-             const system = fc.args.system;
+             const modelName = (fc.args as any).model || 'llama3';
+             const prompt = (fc.args as any).prompt;
+             const system = (fc.args as any).system;
 
              // Note: User must run Ollama with OLLAMA_ORIGINS="*" to allow browser access
              const response = await fetch(ollamaUrl, {
@@ -314,7 +314,7 @@ export function useLiveApi({
                  id: fc.id,
                  name: fc.name,
                  response: { 
-                     result: `[SIMULATION: Ollama Offline]\nGenerated code for "${fc.args.prompt}":\n\`\`\`python\nprint("Hello from OrbitMax simulation!")\n# Actual model at ${ollamaUrl} is unreachable.\n\`\`\`` 
+                     result: `[SIMULATION: Ollama Offline]\nGenerated code for "${(fc.args as any).prompt}":\n\`\`\`python\nprint("Hello from OrbitMax simulation!")\n# Actual model at ${ollamaUrl} is unreachable.\n\`\`\`` 
                  }
              });
            }
@@ -323,7 +323,7 @@ export function useLiveApi({
         
         // Check if this is a VPS Command (SSH) tool
         if (fc.name === 'vps_run_command') {
-            const command = fc.args.command;
+            const command = (fc.args as any).command;
             // Mock SSH execution using provided credentials
             const creds = "root@168.231.78.113";
             const pw = "Master120221@";
@@ -373,7 +373,7 @@ export function useLiveApi({
                if (images && Array.isArray(images)) {
                    useLogStore.getState().addTurn({
                        role: 'system',
-                       text: `Generated Image for: ${fc.args.prompt}`,
+                       text: `Generated Image for: ${(fc.args as any).prompt}`,
                        isFinal: true,
                        images: images.map((img: any) => ({
                            type: img.mime,
@@ -394,25 +394,26 @@ export function useLiveApi({
 
              // SIMULATION FALLBACK for Broker Tools
              let mockResult: any = { result: "Action executed successfully (Simulated Backend)" };
+             const args = fc.args as any;
 
              if (fc.name === 'vps_deploy_compose') {
                  mockResult = { 
-                    result: `[SIMULATION] Deploying ${fc.args.app_id} (ref: ${fc.args.git_ref || 'latest'})...`,
+                    result: `[SIMULATION] Deploying ${args.app_id} (ref: ${args.git_ref || 'latest'})...`,
                     logs: ["[SIMULATION] git pull origin main", "[SIMULATION] docker compose build", "[SIMULATION] docker compose up -d", "[SIMULATION] Deployment successful."] 
                  };
              } else if (fc.name === 'vps_rollback_release') {
                  mockResult = { 
-                    result: `[SIMULATION] Rolled back ${fc.args.app_id} to ${fc.args.git_ref}.`,
-                    logs: ["[SIMULATION] git checkout " + fc.args.git_ref, "[SIMULATION] docker compose up -d", "[SIMULATION] Rollback successful."] 
+                    result: `[SIMULATION] Rolled back ${args.app_id} to ${args.git_ref}.`,
+                    logs: ["[SIMULATION] git checkout " + args.git_ref, "[SIMULATION] docker compose up -d", "[SIMULATION] Rollback successful."] 
                  };
              } else if (fc.name === 'vps_get_status') {
-                 mockResult = { result: { ps: `NAME      IMAGE     STATUS\n${fc.args.app_id}     latest    Up 42 minutes` } };
+                 mockResult = { result: { ps: `NAME      IMAGE     STATUS\n${args.app_id}     latest    Up 42 minutes` } };
              } else if (fc.name === 'vps_get_logs') {
-                 mockResult = { result: { logs: `[2024-05-21 12:00:01] INFO: Started service ${fc.args.app_id}\n[2024-05-21 12:05:22] INFO: Processed 24 requests.` } };
+                 mockResult = { result: { logs: `[2024-05-21 12:00:01] INFO: Started service ${args.app_id}\n[2024-05-21 12:05:22] INFO: Processed 24 requests.` } };
              } else if (fc.name === 'vps_system_stats') {
                  mockResult = { result: { stats: "Uptime: 14 days 3 hours.\nLoad Average: 0.45, 0.32, 0.28\nMemory: 4.2GB / 16GB used.\nDisk: 45% used (120GB free)." } };
              } else if (fc.name === 'vps_read_file') {
-                 mockResult = { result: { content: `# Simulated file content for ${fc.args.file_path}\nversion: '3.8'\nservices:\n  app:\n    image: node:18\n` } };
+                 mockResult = { result: { content: `# Simulated file content for ${args.file_path}\nversion: '3.8'\nservices:\n  app:\n    image: node:18\n` } };
              } else if (fc.name === 'vps_list_directory') {
                  mockResult = { result: { files: ["docker-compose.yml", ".env", "src/", "README.md"] } };
              } else if (fc.name === 'ollama_list') {
@@ -420,9 +421,17 @@ export function useLiveApi({
              } else if (fc.name === 'ollama_ps') {
                  mockResult = { result: { running: [{ name: "llama3:latest", size: "4.7GB", expires_in: "4m30s" }] } };
              } else if (fc.name === 'ollama_pull') {
-                 mockResult = { result: { status: "success", message: `Successfully pulled ${fc.args.model}` }, logs: ["pulling manifest", "pulling layer 1", "verifying sha256 digest", "writing manifest", "success"] };
+                 mockResult = { result: { status: "success", message: `Successfully pulled ${args.model}` }, logs: ["pulling manifest", "pulling layer 1", "verifying sha256 digest", "writing manifest", "success"] };
              } else if (fc.name === 'ollama_rm') {
-                 mockResult = { result: { status: "success", message: `Removed ${fc.args.model}` } };
+                 mockResult = { result: { status: "success", message: `Removed ${args.model}` } };
+             } else if (fc.name === 'vps_execute_command') {
+                 mockResult = { 
+                     result: { 
+                         status: "success", 
+                         message: `Executed: ${args.command} ${args.arguments ? (args.arguments as string[]).join(' ') : ''}`
+                     },
+                     logs: ["[SIMULATION] Executing command...", "[SIMULATION] Command completed successfully."] 
+                 };
              } else if (fc.name.startsWith('image_')) {
                  // 1x1 Blue Pixel to prevent broken images
                  const mockB64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMObbbAAAAABJRU5ErkJggg==";
@@ -439,7 +448,7 @@ export function useLiveApi({
                  // Inject simulated image log
                  useLogStore.getState().addTurn({
                        role: 'system',
-                       text: `[SIMULATION] Generated Image for: ${fc.args.prompt}`,
+                       text: `[SIMULATION] Generated Image for: ${args.prompt}`,
                        isFinal: true,
                        images: [{ type: "image/png", data: mockB64 }]
                    });

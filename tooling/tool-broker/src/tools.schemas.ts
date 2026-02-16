@@ -75,6 +75,11 @@ export const VpsRunCommandArgs = z.object({
   command: z.string().min(1)
 });
 
+export const VpsExecuteCommandArgs = z.object({
+  command: z.string().min(1),
+  arguments: z.array(z.string()).optional()
+});
+
 export const OllamaPullArgs = z.object({
   model: z.string().min(1)
 });

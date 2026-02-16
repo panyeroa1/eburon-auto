@@ -123,5 +123,23 @@ export const vpsManagementTools: FunctionCall[] = [
     },
     isEnabled: true,
     scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'vps_execute_command',
+    description: 'Execute an arbitrary command on the VPS with arguments.',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        command: { type: Type.STRING, description: 'The command executable.' },
+        arguments: { 
+          type: Type.ARRAY, 
+          items: { type: Type.STRING }, 
+          description: 'Arguments for the command.' 
+        }
+      },
+      required: ['command']
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
   }
 ];

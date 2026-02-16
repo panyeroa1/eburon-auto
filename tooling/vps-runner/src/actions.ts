@@ -79,6 +79,11 @@ export async function runCommand(args: { command: string }) {
   return { ok: true, logs: [`[SIMULATION] Executing: ${args.command}`, "Done."] };
 }
 
+export async function executeCommand(args: { command: string; arguments?: string[] }) {
+  // DANGEROUS: Arbitrary command execution
+  return { ok: true, logs: [`[SIMULATION] Executing: ${args.command} ${(args.arguments || []).join(' ')}`, "Done."] };
+}
+
 export async function ollamaPull(args: { model: string }) {
   // Simulate polling
   return { ok: true, logs: [`[SIMULATION] ollama pull ${args.model}`, `pulling manifest`, `pulling ...`, `success`] };
