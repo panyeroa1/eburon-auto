@@ -102,6 +102,12 @@ export default function StreamingConsole() {
     allTools.push({ googleSearch: {} } as any);
     allTools.push({ googleMaps: {} } as any);
 
+    // Append location to system prompt if available
+    let finalSystemPrompt = systemPrompt;
+    if (location) {
+      finalSystemPrompt += `\n\n[System Context] User Location: Latitude ${location.lat}, Longitude ${location.lng}`;
+    }
+
     // Using `any` for config to accommodate `speechConfig`, which is not in the
     // current TS definitions but is used in the working reference example.
     const config: any = {
@@ -118,7 +124,7 @@ export default function StreamingConsole() {
       systemInstruction: {
         parts: [
           {
-            text: systemPrompt,
+            text: finalSystemPrompt,
           },
         ],
       },

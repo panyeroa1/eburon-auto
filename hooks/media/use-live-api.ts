@@ -164,6 +164,34 @@ export function useLiveApi({
             });
             continue;
         }
+        if (fc.name === 'google_docs_create') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Created Google Doc: "${fc.args.title}" (https://docs.google.com/document/d/mock-id)` }
+            });
+            continue;
+        }
+        if (fc.name === 'google_sheets_create') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Created Google Sheet: "${fc.args.title}" (https://docs.google.com/spreadsheets/d/mock-id)` }
+            });
+            continue;
+        }
+        if (fc.name === 'google_slides_create') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Created Google Slides: "${fc.args.title}" (https://docs.google.com/presentation/d/mock-id)` }
+            });
+            continue;
+        }
+        if (fc.name === 'google_keep_create') {
+            functionResponses.push({
+                id: fc.id, name: fc.name,
+                response: { result: `Created Keep Note: "${fc.args.title || 'Untitled'}"` }
+            });
+            continue;
+        }
         if (fc.name === 'youtube_search') {
              functionResponses.push({
                 id: fc.id, name: fc.name,
@@ -196,6 +224,9 @@ export function useLiveApi({
         // Check if this is the Radar tool
         if (fc.name === 'scan_nearby') {
             const query = fc.args.query as string;
+            const lat = fc.args.latitude as number | undefined;
+            const lng = fc.args.longitude as number | undefined;
+            
             // Simulate finding nearby points since we don't have a real Place Search backend in this demo
             const count = Math.floor(Math.random() * 3) + 3; // 3 to 5 points
             const points = [];
@@ -210,10 +241,15 @@ export function useLiveApi({
             useUI.getState().setRadarPoints(points);
             useUI.getState().setRadarActive(true);
 
+            let locMsg = "";
+            if (typeof lat === 'number' && typeof lng === 'number') {
+                locMsg = ` near ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            }
+
             functionResponses.push({
              id: fc.id,
              name: fc.name,
-             response: { result: `Found ${count} locations for ${query}. Displaying on radar.` }
+             response: { result: `Found ${count} locations for ${query}${locMsg}. Displaying on radar.` }
            });
            continue;
         }

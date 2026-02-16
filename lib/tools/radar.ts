@@ -17,6 +17,14 @@ export const radarTools: FunctionCall[] = [
           type: Type.STRING,
           description: 'The type of place to search for (e.g., "coffee", "parking").',
         },
+        latitude: {
+          type: Type.NUMBER,
+          description: 'The latitude of the search center.',
+        },
+        longitude: {
+          type: Type.NUMBER,
+          description: 'The longitude of the search center.',
+        }
       },
       required: ['query'],
     },

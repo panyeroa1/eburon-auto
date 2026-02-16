@@ -75,6 +75,10 @@
 .app-item.calendar .app-icon { color: #4285F4; }
 .app-item.drive .app-icon { color: #1FA463; }
 .app-item.docs .app-icon { color: #4285F4; }
+.app-item.sheets .app-icon { color: #0F9D58; }
+.app-item.slides .app-icon { color: #F4B400; }
+.app-item.keep .app-icon { color: #FFBB00; }
+.app-item.code .app-icon { color: #20C20E; border-color: #20C20E; } /* Matrix Green for code */
 .app-item.maps .app-icon { color: #34A853; }
 .app-item.search .app-icon { color: #FBBC04; }
 .app-item.youtube .app-icon { color: #FF0000; }

@@ -79,6 +79,48 @@ export const googleServiceTools: FunctionCall[] = [
     scheduling: FunctionResponseScheduling.INTERRUPT,
   },
   {
+    name: 'google_sheets_create',
+    description: 'Create a new Google Sheet.',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING },
+        headers: { type: Type.ARRAY, items: { type: Type.STRING } }
+      },
+      required: ['title']
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'google_slides_create',
+    description: 'Create a new Google Slides presentation.',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING },
+        slideCount: { type: Type.INTEGER }
+      },
+      required: ['title']
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'google_keep_create',
+    description: 'Create a new note in Google Keep.',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        title: { type: Type.STRING },
+        textContent: { type: Type.STRING }
+      },
+      required: ['textContent']
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
     name: 'google_drive_search',
     description: 'Search for files in Google Drive.',
     parameters: {
