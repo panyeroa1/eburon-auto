@@ -142,6 +142,10 @@ VPS & System:
 
 Local Intelligence:
 - call_local_model(model?, prompt, system?) <-- Use for coding/private tasks on 168.231.78.113
+- ollama_pull(model)
+- ollama_list()
+- ollama_ps()
+- ollama_rm(model)
 
 Image:
 - image_generate(provider, model, prompt, negative_prompt?, width?, height?, aspect_ratio?, seed?, steps?, guidance?, output_format?, n?)

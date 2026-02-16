@@ -74,3 +74,14 @@ export const VpsListDirectoryArgs = z.object({
 export const VpsRunCommandArgs = z.object({
   command: z.string().min(1)
 });
+
+export const OllamaPullArgs = z.object({
+  model: z.string().min(1)
+});
+
+export const OllamaListArgs = z.object({});
+export const OllamaPsArgs = z.object({});
+
+export const OllamaRmArgs = z.object({
+  model: z.string().min(1)
+});

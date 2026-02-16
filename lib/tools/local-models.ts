@@ -31,4 +31,44 @@ export const localModelTools: FunctionCall[] = [
     isEnabled: true,
     scheduling: FunctionResponseScheduling.INTERRUPT,
   },
+  {
+    name: 'ollama_pull',
+    description: 'Pull a model from the Ollama library on the VPS.',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        model: { type: Type.STRING, description: 'Model tag to pull (e.g. llama3, mistral)' }
+      },
+      required: ['model']
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'ollama_list',
+    description: 'List models available locally on the VPS Ollama instance.',
+    parameters: { type: Type.OBJECT, properties: {} },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'ollama_ps',
+    description: 'List currently running models on the VPS Ollama instance.',
+    parameters: { type: Type.OBJECT, properties: {} },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'ollama_rm',
+    description: 'Remove a model from the VPS Ollama instance.',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        model: { type: Type.STRING }
+      },
+      required: ['model']
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
+  }
 ];

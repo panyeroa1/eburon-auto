@@ -336,8 +336,12 @@ export function useLiveApi({
             continue;
         }
 
-        // Check if this is a VPS or Image tool that needs the broker
-        const isBrokerTool = fc.name.startsWith('vps_') || fc.name.startsWith('image_') || fc.name.startsWith('browser_');
+        // Check if this is a VPS, Image, Browser or Ollama (admin) tool that needs the broker
+        const isBrokerTool = 
+            fc.name.startsWith('vps_') || 
+            fc.name.startsWith('image_') || 
+            fc.name.startsWith('browser_') ||
+            fc.name.startsWith('ollama_');
 
         if (isBrokerTool) {
           try {
@@ -411,6 +415,14 @@ export function useLiveApi({
                  mockResult = { result: { content: `# Simulated file content for ${fc.args.file_path}\nversion: '3.8'\nservices:\n  app:\n    image: node:18\n` } };
              } else if (fc.name === 'vps_list_directory') {
                  mockResult = { result: { files: ["docker-compose.yml", ".env", "src/", "README.md"] } };
+             } else if (fc.name === 'ollama_list') {
+                 mockResult = { result: { models: ["llama3:latest", "mistral:latest", "codellama:7b"] } };
+             } else if (fc.name === 'ollama_ps') {
+                 mockResult = { result: { running: [{ name: "llama3:latest", size: "4.7GB", expires_in: "4m30s" }] } };
+             } else if (fc.name === 'ollama_pull') {
+                 mockResult = { result: { status: "success", message: `Successfully pulled ${fc.args.model}` }, logs: ["pulling manifest", "pulling layer 1", "verifying sha256 digest", "writing manifest", "success"] };
+             } else if (fc.name === 'ollama_rm') {
+                 mockResult = { result: { status: "success", message: `Removed ${fc.args.model}` } };
              } else if (fc.name.startsWith('image_')) {
                  // 1x1 Blue Pixel to prevent broken images
                  const mockB64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMObbbAAAAABJRU5ErkJggg==";

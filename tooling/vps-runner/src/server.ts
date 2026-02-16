@@ -1,7 +1,8 @@
 import express from "express";
 import { 
   deployCompose, restartService, getStatus, rollbackRelease, 
-  getLogs, getSystemStats, readFile, listDirectory, runCommand 
+  getLogs, getSystemStats, readFile, listDirectory, runCommand,
+  ollamaPull, ollamaList, ollamaPs, ollamaRm
 } from "./actions";
 
 const app = express();
@@ -34,6 +35,12 @@ app.post("/v1/system/stats", requireRunnerToken, wrap(getSystemStats));
 app.post("/v1/file/read", requireRunnerToken, wrap(readFile));
 app.post("/v1/file/list", requireRunnerToken, wrap(listDirectory));
 app.post("/v1/system/command", requireRunnerToken, wrap(runCommand));
+
+// Ollama Routes
+app.post("/v1/ollama/pull", requireRunnerToken, wrap(ollamaPull));
+app.post("/v1/ollama/list", requireRunnerToken, wrap(ollamaList));
+app.post("/v1/ollama/ps", requireRunnerToken, wrap(ollamaPs));
+app.post("/v1/ollama/rm", requireRunnerToken, wrap(ollamaRm));
 
 export function start() {
   const port = Number(process.env.PORT || 5055);

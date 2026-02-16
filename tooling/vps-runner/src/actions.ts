@@ -78,3 +78,20 @@ export async function runCommand(args: { command: string }) {
   // DANGEROUS: In production this must be heavily restricted
   return { ok: true, logs: [`[SIMULATION] Executing: ${args.command}`, "Done."] };
 }
+
+export async function ollamaPull(args: { model: string }) {
+  // Simulate polling
+  return { ok: true, logs: [`[SIMULATION] ollama pull ${args.model}`, `pulling manifest`, `pulling ...`, `success`] };
+}
+
+export async function ollamaList(args: {}) {
+  return { ok: true, models: ["llama3:latest", "mistral:latest", "codellama:7b"] };
+}
+
+export async function ollamaPs(args: {}) {
+  return { ok: true, running: [{ name: "llama3:latest", size: "4.7GB", expires_in: "4m30s" }] };
+}
+
+export async function ollamaRm(args: { model: string }) {
+  return { ok: true, logs: [`[SIMULATION] ollama rm ${args.model}`, "deleted"] };
+}
