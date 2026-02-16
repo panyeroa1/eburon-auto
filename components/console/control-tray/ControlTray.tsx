@@ -72,7 +72,10 @@ function ControlTray({ children }: ControlTrayProps) {
     };
     if (connected && !muted && audioRecorder) {
       audioRecorder.on('data', onData);
-      audioRecorder.start();
+      // FIX: Handle start() promise rejection to prevent runtime crash on NetworkError/NotAllowedError
+      audioRecorder.start().catch((err: any) => {
+        console.error("Audio Recorder failed to start:", err);
+      });
     } else {
       audioRecorder.stop();
     }

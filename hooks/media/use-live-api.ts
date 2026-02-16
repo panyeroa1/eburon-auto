@@ -25,7 +25,7 @@ import { AudioStreamer } from '../../lib/audio-streamer';
 import { audioContext } from '../../lib/utils';
 import VolMeterWorket from '../../lib/worklets/vol-meter';
 import { useLogStore, useSettings, useUI, useConnectionStore } from '@/lib/state';
-import { executeRecallMemory } from '@/lib/memory';
+import { executeRecallMemory, executeSaveMemory } from '@/lib/memory';
 
 export type UseLiveApiResults = {
   client: GenAILiveClient;
@@ -231,6 +231,16 @@ export function useLiveApi({
            continue;
         }
 
+        if (fc.name === 'save_memory') {
+           const response = await executeSaveMemory(fc.args);
+           functionResponses.push({
+             id: fc.id,
+             name: fc.name,
+             response: response
+           });
+           continue;
+        }
+
         // Check if this is the Radar tool
         if (fc.name === 'scan_nearby') {
             const query = fc.args.query as string;
@@ -353,6 +363,22 @@ export function useLiveApi({
 
             const result = await response.json();
             
+            // Extract images if present (e.g., from image_generate) and add to logs
+            if (fc.name === 'image_generate' || fc.name === 'image_edit') {
+               const images = result.data?.images; // Broker structure: { data: { images: [...] } }
+               if (images && Array.isArray(images)) {
+                   useLogStore.getState().addTurn({
+                       role: 'system',
+                       text: `Generated Image for: ${fc.args.prompt}`,
+                       isFinal: true,
+                       images: images.map((img: any) => ({
+                           type: img.mime,
+                           data: img.b64
+                       }))
+                   });
+               }
+            }
+
             functionResponses.push({
               id: fc.id,
               name: fc.name,
@@ -374,15 +400,24 @@ export function useLiveApi({
                  mockResult = { result: { ps: `NAME      IMAGE     STATUS\n${fc.args.app_id}     latest    Up 42 minutes` } };
              } else if (fc.name.startsWith('image_')) {
                  // 1x1 Blue Pixel to prevent broken images
+                 const mockB64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMObbbAAAAABJRU5ErkJggg==";
                  mockResult = { 
                      result: {
                          images: [{
                              mime: "image/png",
-                             b64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMObbbAAAAABJRU5ErkJggg=="
+                             b64: mockB64
                          }]
                      },
                      logs: ["[SIMULATION] Image generated successfully."]
                  };
+
+                 // Inject simulated image log
+                 useLogStore.getState().addTurn({
+                       role: 'system',
+                       text: `[SIMULATION] Generated Image for: ${fc.args.prompt}`,
+                       isFinal: true,
+                       images: [{ type: "image/png", data: mockB64 }]
+                   });
              } else if (fc.name.startsWith('browser_')) {
                  mockResult = { result: `Browser command '${fc.name}' executed on mocked session.` };
              }
@@ -418,7 +453,12 @@ export function useLiveApi({
         });
       }
 
-      client.sendToolResponse({ functionResponses: functionResponses });
+      // FIX: Guard against disconnection during tool execution to prevent "Client is not connected" error
+      try {
+        client.sendToolResponse({ functionResponses: functionResponses });
+      } catch (err) {
+        console.warn("Failed to send tool response (probably disconnected):", err);
+      }
     };
 
     client.on('toolcall', onToolCall);

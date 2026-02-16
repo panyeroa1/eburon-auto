@@ -279,6 +279,15 @@ export default function StreamingConsole() {
               <div className="transcription-text-content">
                 {renderContent(t.text)}
               </div>
+              {t.images && t.images.map((img, idx) => (
+                <div key={idx} className="transcription-image" style={{marginTop: '10px'}}>
+                   <img 
+                      src={`data:${img.type};base64,${img.data}`} 
+                      alt="Generated Content" 
+                      style={{maxWidth: '100%', borderRadius: '12px', border: '1px solid #333'}} 
+                   />
+                </div>
+              ))}
               {t.groundingChunks && t.groundingChunks.length > 0 && (
                 <div className="grounding-chunks">
                   <strong>Sources:</strong>

@@ -123,10 +123,14 @@ export class GenAILiveClient {
       console.error('Error connecting to GenAI Live:', e);
       this._status = 'disconnected';
       this.session = undefined;
+      
+      // FIX: Ensure ErrorEvent is constructed correctly with the error message
       const errorEvent = new ErrorEvent('error', {
-        error: e,
-        message: e?.message || 'Failed to connect.',
+        message: e?.message || 'Failed to connect to GenAI Live API.',
       });
+      // Attach the original error object if possible for debugging (though non-standard)
+      (errorEvent as any).error = e;
+      
       this.onError(errorEvent);
       return false;
     }
@@ -146,7 +150,8 @@ export class GenAILiveClient {
 
   public send(parts: Part | Part[], turnComplete: boolean = true) {
     if (this._status !== 'connected' || !this.session) {
-      this.emitter.emit('error', new ErrorEvent('Client is not connected'));
+      // FIX: Use correct ErrorEvent signature
+      this.emitter.emit('error', new ErrorEvent('error', { message: 'Client is not connected' }));
       return;
     }
     this.session.sendClientContent({ turns: parts, turnComplete });
@@ -155,7 +160,8 @@ export class GenAILiveClient {
 
   public sendRealtimeInput(chunks: Array<{ mimeType: string; data: string }>) {
     if (this._status !== 'connected' || !this.session) {
-      this.emitter.emit('error', new ErrorEvent('Client is not connected'));
+      // FIX: Use correct ErrorEvent signature
+      this.emitter.emit('error', new ErrorEvent('error', { message: 'Client is not connected' }));
       return;
     }
     chunks.forEach(chunk => {
@@ -180,7 +186,8 @@ export class GenAILiveClient {
 
   public sendToolResponse(toolResponse: LiveClientToolResponse) {
     if (this._status !== 'connected' || !this.session) {
-      this.emitter.emit('error', new ErrorEvent('Client is not connected'));
+      // FIX: Use correct ErrorEvent signature
+      this.emitter.emit('error', new ErrorEvent('error', { message: 'Client is not connected' }));
       return;
     }
     if (
@@ -276,9 +283,9 @@ export class GenAILiveClient {
 
   protected onError(e: ErrorEvent) {
     this._status = 'disconnected';
-    console.error('error:', e);
+    console.error('GenAI Live Client Error:', e);
 
-    const message = `Could not connect to GenAI Live: ${e.message}`;
+    const message = `GenAI Live Error: ${e.message}`;
     this.log(`server.${e.type}`, message);
     this.emitter.emit('error', e);
   }

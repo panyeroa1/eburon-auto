@@ -108,6 +108,26 @@ export const memoryTools: FunctionCall[] = [
     },
     isEnabled: true,
     scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
+  {
+    name: 'save_memory',
+    description: 'Explicitly saves a specific fact, note, or preference to long-term memory. Use this when the user asks you to remember something specific.',
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        content: {
+          type: Type.STRING,
+          description: 'The fact or information to save.',
+        },
+        category: {
+          type: Type.STRING,
+          description: 'Optional category (e.g., preference, fact, task).',
+        }
+      },
+      required: ['content'],
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
   }
 ];
 
@@ -149,5 +169,19 @@ export async function executeRecallMemory(args: any) {
   } catch (e: any) {
     console.error("Memory execution exception:", e);
     return { error: `Memory recall execution failed: ${e.message}` };
+  }
+}
+
+export async function executeSaveMemory(args: any) {
+  const content = args.content;
+  const category = args.category || 'general';
+  
+  try {
+    // We use a specific role 'memory' to distinguish these explicit saves 
+    // from general chat logs, though recall_memory searches everything.
+    await saveMessage('memory', `[${category}] ${content}`);
+    return { result: "Memory saved successfully." };
+  } catch (e: any) {
+    return { error: `Memory save failed: ${e.message}` };
   }
 }
